@@ -50,13 +50,13 @@ export interface Database {
         Row: {
           id: number
           usuario_id: string
-          questao_id: number
+          questao_id: string
           acertou: boolean
           respondido_em: string
         }
         Insert: {
           usuario_id: string
-          questao_id: number
+          questao_id: string
           acertou: boolean
           respondido_em?: string
         }

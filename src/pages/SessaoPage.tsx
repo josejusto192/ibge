@@ -11,7 +11,7 @@ interface Alternativa {
 }
 
 interface Questao {
-  id: number
+  id: string
   enunciado_html: string
   alternativas: Alternativa[]
   gabarito_letra: string
@@ -55,7 +55,7 @@ export function SessaoPage() {
       setTrilhaNome((trilha as { nome: string } | null)?.nome ?? '')
 
       const respondidaIds = new Set(
-        ((respondidas ?? []) as { questao_id: number }[]).map((r) => r.questao_id)
+        ((respondidas ?? []) as { questao_id: string }[]).map((r) => r.questao_id)
       )
 
       const { data: todasQuestoes } = await supabase

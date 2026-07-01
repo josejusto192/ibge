@@ -30,10 +30,11 @@ create policy "usuarios: atualização própria"
 
 
 -- Progresso por questão
+-- questao_id referencia questoes.id que é uuid
 create table if not exists public.progresso_questoes (
   id            bigserial primary key,
   usuario_id    uuid not null references public.usuarios(id) on delete cascade,
-  questao_id    bigint not null references public.questoes(id) on delete cascade,
+  questao_id    uuid not null references public.questoes(id) on delete cascade,
   acertou       boolean not null,
   respondido_em timestamptz not null default now(),
   unique (usuario_id, questao_id)

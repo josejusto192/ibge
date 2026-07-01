@@ -22,7 +22,7 @@ export function DisciplinaConcluidaPage() {
         .eq('anulada', false)
         .eq('desatualizada', false)
 
-      const ids = ((questoes ?? []) as { id: number }[]).map((q) => q.id)
+      const ids = ((questoes ?? []) as { id: string }[]).map((q) => q.id)
 
       const { data: prog } = await supabase
         .from('progresso_questoes')

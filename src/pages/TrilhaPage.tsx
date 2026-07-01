@@ -61,14 +61,14 @@ export function TrilhaPage() {
       ])
 
       const respondidaIds = new Set(
-        ((respondidas ?? []) as { questao_id: number; acertou: boolean }[]).map((r) => r.questao_id)
+        ((respondidas ?? []) as { questao_id: string; acertou: boolean }[]).map((r) => r.questao_id)
       )
       const acertouMap = new Map(
-        ((respondidas ?? []) as { questao_id: number; acertou: boolean }[]).map((r) => [r.questao_id, r.acertou])
+        ((respondidas ?? []) as { questao_id: string; acertou: boolean }[]).map((r) => [r.questao_id, r.acertou])
       )
 
       const prog: ProgressoDisciplina = {}
-      for (const q of (todasQuestoes ?? []) as { id: number; disciplina: string }[]) {
+      for (const q of (todasQuestoes ?? []) as { id: string; disciplina: string }[]) {
         if (!prog[q.disciplina]) prog[q.disciplina] = { respondidas: 0, total: 0, acertos: 0 }
         prog[q.disciplina].total++
         if (respondidaIds.has(q.id)) {
