@@ -91,7 +91,7 @@ insert into public.trilhas (nome, slug, descricao, ativa, ordem)
 values (
   'IBGE 2025',
   'ibge',
-  'Preparação completa para o concurso do IBGE com questões comentadas de bancas anteriores.',
+  'Preparação completa para o IBGE — 2.544 questões comentadas em 24 disciplinas.',
   true,
   1
 )
@@ -100,6 +100,8 @@ on conflict (slug) do nothing;
 -- Insira aqui as disciplinas na ordem desejada.
 -- Execute: SELECT DISTINCT disciplina FROM questoes ORDER BY disciplina;
 -- para ver os valores exatos e substitua abaixo.
+-- Disciplinas extraídas diretamente da tabela questoes (orgao = IBGE, anulada=false, desatualizada=false)
+-- Ordenadas por volume de questões disponíveis (maior → menor)
 insert into public.trilha_disciplinas (trilha_id, disciplina, ordem)
 select
   t.id,
@@ -107,17 +109,30 @@ select
   d.ordem
 from public.trilhas t
 cross join (values
-  ('Língua Portuguesa',           1),
-  ('Raciocínio Lógico',           2),
-  ('Matemática',                  3),
-  ('Estatística',                 4),
-  ('Noções de Informática',       5),
-  ('Direito Constitucional',      6),
-  ('Direito Administrativo',      7),
-  ('Administração Pública',       8),
-  ('Economia',                    9),
-  ('Geografia do Brasil',        10),
-  ('Atualidades',                11)
+  ('Administração Geral e Pública',                    1),
+  ('Estatística',                                      2),
+  ('AFO, Direito Financeiro e Contabilidade Pública',  3),
+  ('Direito Administrativo (Doutrina e Leis Federais)',4),
+  ('Comunicação Social',                               5),
+  ('Atualidades e Conhecimentos Gerais',               6),
+  ('Administração de Recursos Materiais',              7),
+  ('Economia e Finanças Públicas',                     8),
+  ('Arquivologia',                                     9),
+  ('Engenharia Civil e Auditoria de Obras',           10),
+  ('Ética no Serviço Público',                        11),
+  ('Engenharia Elétrica e Eletrônica',                12),
+  ('Engenharia Ambiental, Florestal e Sanitária',     13),
+  ('Ciências Sociais',                                14),
+  ('Biologia e Biomedicina',                          15),
+  ('Auditoria Privada',                               16),
+  ('Engenharia Agronômica e Agrícola',                17),
+  ('Contabilidade Geral',                             18),
+  ('Auditoria Governamental e Controle',              19),
+  ('Biblioteconomia',                                 20),
+  ('Arquitetura',                                     21),
+  ('Análise das Demonstrações Contábeis',             22),
+  ('Contabilidade de Custos',                         23),
+  ('Ciências Políticas',                              24)
 ) as d(disciplina, ordem)
 where t.slug = 'ibge'
 on conflict do nothing;
