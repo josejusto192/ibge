@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
 import { TrilhaPage } from './pages/TrilhaPage'
+import { FiltrosPage } from './pages/FiltrosPage'
 import { SessaoPage } from './pages/SessaoPage'
 import { DisciplinaConcluidaPage } from './pages/DisciplinaConcluida'
 
@@ -38,6 +39,10 @@ function AppRoutes() {
       <Route path="/trilha/:slug" element={<PrivateRoute><TrilhaPage /></PrivateRoute>} />
       <Route
         path="/trilha/:slug/disciplina/:disciplina"
+        element={<PrivateRoute><FiltrosPage /></PrivateRoute>}
+      />
+      <Route
+        path="/trilha/:slug/disciplina/:disciplina/sessao"
         element={<PrivateRoute><SessaoPage /></PrivateRoute>}
       />
       <Route

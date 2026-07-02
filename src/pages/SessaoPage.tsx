@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -27,6 +27,7 @@ type FaseResposta = 'aguardando' | 'respondida'
 
 export function SessaoPage() {
   const { slug, disciplina } = useParams<{ slug: string; disciplina: string }>()
+  const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -38,6 +39,11 @@ export function SessaoPage() {
   const [trilhaNome, setTrilhaNome] = useState('')
 
   const questaoAtual = questoes[indice]
+
+  // Filtros vindos da URL
+  const bancasFiltro = searchParams.get('bancas')?.split(',').filter(Boolean) ?? []
+  const anosFiltro = searchParams.get('anos')?.split(',').map(Number).filter(Boolean) ?? []
+  const soNaoRespondidas = searchParams.get('soNaoRespondidas') !== 'false'
 
   useEffect(() => {
     if (!user) return
@@ -58,7 +64,7 @@ export function SessaoPage() {
         ((respondidas ?? []) as { questao_id: string }[]).map((r) => r.questao_id)
       )
 
-      const { data: todasQuestoes } = await supabase
+      let query = supabase
         .from('questoes')
         .select('id, enunciado_html, alternativas, gabarito_letra, comentario_html, disciplina, assunto, tem_imagem, banca, ano')
         .eq('disciplina', disciplinaDecoded)
@@ -67,11 +73,16 @@ export function SessaoPage() {
         .order('assunto', { ascending: true })
         .order('id', { ascending: true })
 
-      const naorespondidas = ((todasQuestoes ?? []) as Questao[]).filter(
-        (q) => !respondidaIds.has(q.id)
-      )
+      if (bancasFiltro.length > 0) query = query.in('banca', bancasFiltro)
+      if (anosFiltro.length > 0) query = query.in('ano', anosFiltro)
 
-      setQuestoes(naorespondidas)
+      const { data: todasQuestoes } = await query
+
+      const questoesFiltradas = soNaoRespondidas
+        ? ((todasQuestoes ?? []) as Questao[]).filter((q) => !respondidaIds.has(q.id))
+        : ((todasQuestoes ?? []) as Questao[])
+
+      setQuestoes(questoesFiltradas)
       setLoading(false)
     }
     load()
@@ -91,9 +102,15 @@ export function SessaoPage() {
     })
   }, [fase, questaoAtual, user])
 
+  const temFiltrosAtivos = bancasFiltro.length > 0 || anosFiltro.length > 0 || !soNaoRespondidas
+
   const proximaQuestao = () => {
     if (indice + 1 >= questoes.length) {
-      navigate(`/trilha/${slug}/disciplina/${disciplina}/concluida`)
+      if (temFiltrosAtivos) {
+        navigate(`/trilha/${slug}/disciplina/${disciplina}`)
+      } else {
+        navigate(`/trilha/${slug}/disciplina/${disciplina}/concluida`)
+      }
       return
     }
     setIndice((i) => i + 1)
@@ -153,6 +170,9 @@ export function SessaoPage() {
           </div>
           <p className="text-xs text-gray-400 truncate">
             {trilhaNome} · {decodeURIComponent(disciplina!)}
+            {temFiltrosAtivos && (
+              <span className="ml-1 text-blue-400">· filtros ativos</span>
+            )}
           </p>
         </div>
       </header>
