@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -24,10 +24,12 @@ interface FiltroState {
 
 export function FiltrosPage() {
   const { slug, disciplina } = useParams<{ slug: string; disciplina: string }>()
+  const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const navigate = useNavigate()
 
   const disciplinaDecoded = decodeURIComponent(disciplina!)
+  const nivelParam = searchParams.get('nivel') ?? undefined
 
   const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([])
   const [totalQuestoes, setTotalQuestoes] = useState(0)
@@ -45,13 +47,17 @@ export function FiltrosPage() {
   useEffect(() => {
     if (!user) return
     const load = async () => {
+      let q = supabase
+        .from('questoes')
+        .select('id, ano, banca')
+        .eq('disciplina', disciplinaDecoded)
+        .eq('anulada', false)
+        .eq('desatualizada', false)
+
+      if (nivelParam) q = q.eq('nivel_escolaridade', nivelParam)
+
       const [{ data: questoes }, { data: respondidas }] = await Promise.all([
-        supabase
-          .from('questoes')
-          .select('id, ano, banca')
-          .eq('disciplina', disciplinaDecoded)
-          .eq('anulada', false)
-          .eq('desatualizada', false),
+        q,
         supabase
           .from('progresso_questoes')
           .select('questao_id')
@@ -67,7 +73,7 @@ export function FiltrosPage() {
       setRespondidaIds(ids)
     }
     load()
-  }, [disciplinaDecoded, user])
+  }, [disciplinaDecoded, nivelParam, user])
 
   // Recalcula total filtrado sempre que filtros mudam
   useEffect(() => {
@@ -82,6 +88,7 @@ export function FiltrosPage() {
         .eq('anulada', false)
         .eq('desatualizada', false)
 
+      if (nivelParam) query = query.eq('nivel_escolaridade', nivelParam)
       if (filtros.bancas.length > 0) query = query.in('banca', filtros.bancas)
       if (filtros.anos.length > 0) query = query.in('ano', filtros.anos.map(Number))
 
@@ -115,6 +122,7 @@ export function FiltrosPage() {
 
   const iniciarSessao = () => {
     const params = new URLSearchParams()
+    if (nivelParam) params.set('nivel', nivelParam)
     if (filtros.bancas.length > 0) params.set('bancas', filtros.bancas.join(','))
     if (filtros.anos.length > 0) params.set('anos', filtros.anos.join(','))
     params.set('soNaoRespondidas', String(filtros.soNaoRespondidas))
@@ -134,7 +142,10 @@ export function FiltrosPage() {
           </button>
           <div>
             <h1 className="text-base font-bold text-gray-900 leading-tight">{disciplinaDecoded}</h1>
-            <p className="text-xs text-gray-400">{totalQuestoes} questões no total</p>
+            <p className="text-xs text-gray-400">
+              {nivelParam && <span className="text-blue-500 mr-1">🎓 {nivelParam} ·</span>}
+              {totalQuestoes} questões no total
+            </p>
           </div>
         </div>
       </header>

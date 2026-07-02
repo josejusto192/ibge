@@ -41,6 +41,7 @@ export function SessaoPage() {
   const questaoAtual = questoes[indice]
 
   // Filtros vindos da URL
+  const nivelFiltro = searchParams.get('nivel') ?? null
   const bancasFiltro = searchParams.get('bancas')?.split(',').filter(Boolean) ?? []
   const anosFiltro = searchParams.get('anos')?.split(',').map(Number).filter(Boolean) ?? []
   const soNaoRespondidas = searchParams.get('soNaoRespondidas') !== 'false'
@@ -73,6 +74,7 @@ export function SessaoPage() {
         .order('assunto', { ascending: true })
         .order('id', { ascending: true })
 
+      if (nivelFiltro) query = query.eq('nivel_escolaridade', nivelFiltro)
       if (bancasFiltro.length > 0) query = query.in('banca', bancasFiltro)
       if (anosFiltro.length > 0) query = query.in('ano', anosFiltro)
 
@@ -102,7 +104,7 @@ export function SessaoPage() {
     })
   }, [fase, questaoAtual, user])
 
-  const temFiltrosAtivos = bancasFiltro.length > 0 || anosFiltro.length > 0 || !soNaoRespondidas
+  const temFiltrosAtivos = !!nivelFiltro || bancasFiltro.length > 0 || anosFiltro.length > 0 || !soNaoRespondidas
 
   const proximaQuestao = () => {
     if (indice + 1 >= questoes.length) {

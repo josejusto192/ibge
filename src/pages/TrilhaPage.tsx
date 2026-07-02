@@ -1,25 +1,28 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 
-interface Disciplina {
-  id: number
+interface DisciplinaInfo {
   disciplina: string
-  ordem: number
+  total: number
+  respondidas: number
+  acertos: number
 }
 
-interface ProgressoDisciplina {
-  [disciplina: string]: { respondidas: number; total: number; acertos: number }
+interface NivelInfo {
+  nivel: string
+  disciplinas: DisciplinaInfo[]
 }
 
 export function TrilhaPage() {
   const { slug } = useParams<{ slug: string }>()
   const { user } = useAuth()
   const navigate = useNavigate()
+
   const [trilhaNome, setTrilhaNome] = useState('')
-  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
-  const [progresso, setProgresso] = useState<ProgressoDisciplina>({})
+  const [niveis, setNiveis] = useState<NivelInfo[]>([])
+  const [nivelSelecionado, setNivelSelecionado] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -27,31 +30,17 @@ export function TrilhaPage() {
     const load = async () => {
       const { data: trilha } = await supabase
         .from('trilhas')
-        .select('id, nome')
+        .select('nome')
         .eq('slug', slug!)
         .single()
 
-      if (!trilha) { navigate('/'); return }
+      setTrilhaNome((trilha as { nome: string } | null)?.nome ?? '')
 
-      const t = trilha as { id: number; nome: string }
-      setTrilhaNome(t.nome)
-
-      const { data: discs } = await supabase
-        .from('trilha_disciplinas')
-        .select('*')
-        .eq('trilha_id', t.id)
-        .order('ordem')
-
-      const disciplinaList = (discs ?? []) as Disciplina[]
-      setDisciplinas(disciplinaList)
-
-      const disciplinaNames = disciplinaList.map((d) => d.disciplina)
-
-      const [{ data: todasQuestoes }, { data: respondidas }] = await Promise.all([
+      // Busca disciplinas dinamicamente da tabela questoes
+      const [{ data: questoes }, { data: respondidas }] = await Promise.all([
         supabase
           .from('questoes')
-          .select('id, disciplina')
-          .in('disciplina', disciplinaNames)
+          .select('id, disciplina, nivel_escolaridade')
           .eq('anulada', false)
           .eq('desatualizada', false),
         supabase
@@ -60,27 +49,56 @@ export function TrilhaPage() {
           .eq('usuario_id', user.id),
       ])
 
-      const respondidaIds = new Set(
-        ((respondidas ?? []) as { questao_id: string; acertou: boolean }[]).map((r) => r.questao_id)
-      )
-      const acertouMap = new Map(
-        ((respondidas ?? []) as { questao_id: string; acertou: boolean }[]).map((r) => [r.questao_id, r.acertou])
+      const respondidaMap = new Map(
+        ((respondidas ?? []) as { questao_id: string; acertou: boolean }[]).map(
+          (r) => [r.questao_id, r.acertou]
+        )
       )
 
-      const prog: ProgressoDisciplina = {}
-      for (const q of (todasQuestoes ?? []) as { id: string; disciplina: string }[]) {
-        if (!prog[q.disciplina]) prog[q.disciplina] = { respondidas: 0, total: 0, acertos: 0 }
-        prog[q.disciplina].total++
-        if (respondidaIds.has(q.id)) {
-          prog[q.disciplina].respondidas++
-          if (acertouMap.get(q.id)) prog[q.disciplina].acertos++
+      // Agrupa por nivel_escolaridade → disciplina
+      const niveisMap = new Map<string, Map<string, DisciplinaInfo>>()
+
+      for (const q of (questoes ?? []) as { id: string; disciplina: string; nivel_escolaridade: string | null }[]) {
+        const nivel = q.nivel_escolaridade ?? 'Geral'
+        const disc = q.disciplina
+
+        if (!niveisMap.has(nivel)) niveisMap.set(nivel, new Map())
+        const discMap = niveisMap.get(nivel)!
+
+        if (!discMap.has(disc)) {
+          discMap.set(disc, { disciplina: disc, total: 0, respondidas: 0, acertos: 0 })
+        }
+        const info = discMap.get(disc)!
+        info.total++
+        if (respondidaMap.has(q.id)) {
+          info.respondidas++
+          if (respondidaMap.get(q.id)) info.acertos++
         }
       }
-      setProgresso(prog)
+
+      const resultado: NivelInfo[] = Array.from(niveisMap.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([nivel, discMap]) => ({
+          nivel,
+          disciplinas: Array.from(discMap.values()).sort((a, b) =>
+            a.disciplina.localeCompare(b.disciplina)
+          ),
+        }))
+
+      setNiveis(resultado)
+
+      // Seleciona o primeiro nível automaticamente
+      if (resultado.length === 1) {
+        setNivelSelecionado(resultado[0].nivel)
+      }
+
       setLoading(false)
     }
     load()
-  }, [slug, user, navigate])
+  }, [slug, user])
+
+  const niveisDisponiveis = niveis.map((n) => n.nivel)
+  const disciplinasExibidas = niveis.find((n) => n.nivel === nivelSelecionado)?.disciplinas ?? []
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,7 +114,7 @@ export function TrilhaPage() {
       <main className="max-w-xl mx-auto px-4 py-6">
         {loading ? (
           <div className="space-y-3">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3].map((i) => (
               <div key={i} className="card animate-pulse">
                 <div className="h-5 bg-gray-200 rounded w-2/3 mb-3" />
                 <div className="h-2 bg-gray-100 rounded" />
@@ -104,44 +122,92 @@ export function TrilhaPage() {
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {disciplinas.map((disc) => {
-              const p = progresso[disc.disciplina] ?? { respondidas: 0, total: 0, acertos: 0 }
-              const pct = p.total > 0 ? Math.round((p.respondidas / p.total) * 100) : 0
-              const concluida = p.total > 0 && p.respondidas >= p.total
+          <>
+            {/* Seletor de escolaridade */}
+            {niveisDisponiveis.length > 1 && (
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                  Nível de escolaridade
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {niveisDisponiveis.map((nivel) => (
+                    <button
+                      key={nivel}
+                      onClick={() => setNivelSelecionado(nivel)}
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${
+                        nivelSelecionado === nivel
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                      }`}
+                    >
+                      {nivel}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
-              return (
-                <Link
-                  key={disc.id}
-                  to={`/trilha/${slug}/disciplina/${encodeURIComponent(disc.disciplina)}`}
-                  className="card block hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-gray-900">{disc.disciplina}</h4>
-                        {concluida && <span className="text-green-500 text-sm">✓</span>}
+            {/* Nível único — exibe badge */}
+            {niveisDisponiveis.length === 1 && (
+              <div className="mb-5">
+                <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-200">
+                  🎓 {niveisDisponiveis[0]}
+                </span>
+              </div>
+            )}
+
+            {/* Lista de disciplinas */}
+            {nivelSelecionado === null && niveisDisponiveis.length > 1 ? (
+              <div className="card text-center text-gray-500 py-8">
+                Selecione um nível de escolaridade para ver as disciplinas.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {disciplinasExibidas.map((disc) => {
+                  const pct = disc.total > 0 ? Math.round((disc.respondidas / disc.total) * 100) : 0
+                  const concluida = disc.total > 0 && disc.respondidas >= disc.total
+                  const params = new URLSearchParams({ nivel: nivelSelecionado ?? '' })
+
+                  return (
+                    <button
+                      key={disc.disciplina}
+                      onClick={() =>
+                        navigate(
+                          `/trilha/${slug}/disciplina/${encodeURIComponent(disc.disciplina)}?${params}`
+                        )
+                      }
+                      className="card w-full text-left hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-gray-900">{disc.disciplina}</h4>
+                            {concluida && <span className="text-green-500 text-sm">✓</span>}
+                          </div>
+                          <p className="text-sm text-gray-500 mt-0.5">
+                            {disc.respondidas}/{disc.total} questões
+                            {disc.respondidas > 0 && (
+                              <> · {Math.round((disc.acertos / disc.respondidas) * 100)}% de acerto</>
+                            )}
+                          </p>
+                        </div>
+                        <span className="text-gray-400 text-xl ml-2">›</span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-0.5">
-                        {p.respondidas}/{p.total} questões
-                        {p.respondidas > 0 && (
-                          <> · {Math.round((p.acertos / p.respondidas) * 100)}% de acerto</>
-                        )}
-                      </p>
-                    </div>
-                    <span className="text-gray-400 text-xl ml-2">›</span>
-                  </div>
 
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${concluida ? 'bg-green-500' : 'bg-blue-500'}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${
+                            concluida ? 'bg-green-500' : 'bg-blue-500'
+                          }`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>
