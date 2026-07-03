@@ -74,12 +74,12 @@ export function SessaoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#081529' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#f8f9fb' }}>
         <div className="text-center">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 animate-pulse" style={{ background: 'rgba(245,195,59,0.1)', border: '1px solid rgba(245,195,59,0.2)' }}>
-            <IconBook size={20} color="#F5C33B" />
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 animate-pulse" style={{ background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.2)' }}>
+            <IconBook size={20} color="#D4A017" />
           </div>
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Carregando questões...</p>
+          <p className="text-sm" style={{ color: '#6b7280' }}>Carregando questões...</p>
         </div>
       </div>
     )
@@ -87,13 +87,13 @@ export function SessaoPage() {
 
   if (questoes.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#081529' }}>
-        <div className="rounded-2xl p-8 max-w-sm w-full text-center" style={{ background: '#0C1E3D', border: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(245,195,59,0.1)', border: '1px solid rgba(245,195,59,0.2)' }}>
-            <IconCheck size={20} color="#F5C33B" />
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#f8f9fb' }}>
+        <div className="rounded-2xl p-8 max-w-sm w-full text-center" style={{ background: '#fff', border: '1px solid #e5e7eb' }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(212,160,23,0.1)', border: '1px solid rgba(212,160,23,0.2)' }}>
+            <IconCheck size={20} color="#D4A017" />
           </div>
-          <h2 className="text-lg font-bold text-white mb-2">Tudo respondido!</h2>
-          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.45)' }}>Você respondeu todas as questões desta disciplina com os filtros selecionados.</p>
+          <h2 className="text-lg font-bold mb-2" style={{ color: '#111827' }}>Tudo respondido!</h2>
+          <p className="text-sm mb-6" style={{ color: '#6b7280' }}>Você respondeu todas as questões desta disciplina com os filtros selecionados.</p>
           <button onClick={() => navigate(`/trilha/${slug}`)} className="btn-primary w-full">Voltar para a trilha</button>
         </div>
       </div>

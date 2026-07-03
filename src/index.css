@@ -42,5 +42,5 @@
 .questao-html p:last-child { margin-bottom: 0; }
 
 * { box-sizing: border-box; }
-body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #081529; color: #fff; -webkit-font-smoothing: antialiased; }
+body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f8f9fb; color: #111827; -webkit-font-smoothing: antialiased; }
 #root { min-height: 100vh; }
