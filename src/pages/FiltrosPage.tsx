@@ -69,10 +69,10 @@ export function FiltrosPage() {
   const semQuestoes = qtd === 0
 
   const chipActive = { background: 'linear-gradient(135deg, #F5C33B 0%, #D4A017 100%)', color: '#081529', border: 'none', fontWeight: 600 as const }
-  const chipInactive = { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }
+  const chipInactive = { background: '#fff', color: '#374151', border: '1px solid #e5e7eb' }
 
   return (
-    <div className="min-h-screen pb-24" style={{ background: '#081529' }}>
+    <div className="min-h-screen pb-24" style={{ background: '#f8f9fb' }}>
       <header style={{ background: '#0C1E3D', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="max-w-xl mx-auto px-4 h-14 flex items-center gap-3">
           <button onClick={() => navigate(`/trilha/${slug}`)} className="w-8 h-8 flex items-center justify-center rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
@@ -85,7 +85,7 @@ export function FiltrosPage() {
               {totalQuestoes} questões
             </p>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: 'rgba(245,195,59,0.1)', color: '#F5C33B' }}>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg" style={{ background: 'rgba(245,195,59,0.15)', color: '#F5C33B' }}>
             <IconFilter size={13} />
             <span className="text-xs font-semibold">Filtros</span>
           </div>
@@ -94,52 +94,57 @@ export function FiltrosPage() {
 
       <main className="max-w-xl mx-auto px-4 py-5 space-y-4">
         {/* Toggle */}
-        <div className="rounded-xl px-4 py-3.5 flex items-center justify-between" style={{ background: '#0C1E3D', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="rounded-xl px-4 py-3.5 flex items-center justify-between" style={{ background: '#fff', border: '1px solid #e5e7eb' }}>
           <div>
-            <p className="font-semibold text-white text-sm">Só não respondidas</p>
-            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{totalQuestoes - respondidaIds.size} disponíveis</p>
+            <p className="font-semibold text-sm" style={{ color: '#111827' }}>Só não respondidas</p>
+            <p className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{totalQuestoes - respondidaIds.size} disponíveis</p>
           </div>
           <button
+            role="switch"
+            aria-checked={filtros.soNaoRespondidas}
             onClick={() => setFiltros((f) => ({ ...f, soNaoRespondidas: !f.soNaoRespondidas }))}
-            className="relative rounded-full transition-all"
-            style={{ width: 44, height: 24, background: filtros.soNaoRespondidas ? 'linear-gradient(135deg, #F5C33B 0%, #D4A017 100%)' : 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.12)' }}
+            className="relative rounded-full transition-colors duration-200 focus:outline-none"
+            style={{ width: 48, height: 28, background: filtros.soNaoRespondidas ? '#F5C33B' : '#d1d5db', flexShrink: 0 }}
           >
-            <span className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform" style={{ transform: filtros.soNaoRespondidas ? 'translateX(22px)' : 'translateX(2px)' }} />
+            <span
+              className="absolute top-1 rounded-full bg-white shadow-sm transition-transform duration-200"
+              style={{ width: 20, height: 20, left: 4, transform: filtros.soNaoRespondidas ? 'translateX(20px)' : 'translateX(0)' }}
+            />
           </button>
         </div>
 
         {/* Banca */}
-        <div className="rounded-xl p-4" style={{ background: '#0C1E3D', border: '1px solid rgba(255,255,255,0.07)' }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '1.5px' }}>Banca</p>
+        <div className="rounded-xl p-4" style={{ background: '#fff', border: '1px solid #e5e7eb' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#9ca3af', letterSpacing: '1.5px' }}>Banca</p>
           <div className="flex flex-wrap gap-1.5">
             {BANCAS_IBGE.map((b) => (
               <button key={b} onClick={() => toggleBanca(b)} className="px-2.5 py-1 rounded-lg text-xs transition-all" style={filtros.bancas.includes(b) ? chipActive : chipInactive}>{b}</button>
             ))}
           </div>
-          {filtros.bancas.length === 0 && <p className="text-xs mt-2.5" style={{ color: 'rgba(255,255,255,0.25)' }}>Todas as bancas incluídas</p>}
+          {filtros.bancas.length === 0 && <p className="text-xs mt-2.5" style={{ color: '#9ca3af' }}>Todas as bancas incluídas</p>}
         </div>
 
         {/* Ano */}
         {anosDisponiveis.length > 0 && (
-          <div className="rounded-xl p-4" style={{ background: '#0C1E3D', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '1.5px' }}>Ano</p>
+          <div className="rounded-xl p-4" style={{ background: '#fff', border: '1px solid #e5e7eb' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#9ca3af', letterSpacing: '1.5px' }}>Ano</p>
             <div className="flex flex-wrap gap-1.5">
               {anosDisponiveis.map((ano) => (
                 <button key={ano} onClick={() => toggleAno(String(ano))} className="px-3 py-1 rounded-lg text-xs transition-all" style={filtros.anos.includes(String(ano)) ? chipActive : chipInactive}>{ano}</button>
               ))}
             </div>
-            {filtros.anos.length === 0 && <p className="text-xs mt-2.5" style={{ color: 'rgba(255,255,255,0.25)' }}>Todos os anos incluídos</p>}
+            {filtros.anos.length === 0 && <p className="text-xs mt-2.5" style={{ color: '#9ca3af' }}>Todos os anos incluídos</p>}
           </div>
         )}
 
         {(filtros.bancas.length > 0 || filtros.anos.length > 0) && (
-          <button onClick={() => setFiltros((f) => ({ ...f, bancas: [], anos: [] }))} className="text-xs underline underline-offset-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <button onClick={() => setFiltros((f) => ({ ...f, bancas: [], anos: [] }))} className="text-xs underline underline-offset-2" style={{ color: '#9ca3af' }}>
             Limpar filtros de banca e ano
           </button>
         )}
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 px-4 py-3" style={{ background: '#0C1E3D', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+      <div className="fixed bottom-0 left-0 right-0 px-4 py-3" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
         <div className="max-w-xl mx-auto">
           <button onClick={iniciarSessao} disabled={semQuestoes} className="btn-primary w-full">
             {loadingCount ? 'Calculando...' : semQuestoes ? 'Nenhuma questão com esses filtros' : `Iniciar sessão · ${qtd} questão${qtd !== 1 ? 'ões' : ''}`}

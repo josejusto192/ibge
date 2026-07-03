@@ -37,7 +37,7 @@
 
 .questao-html img { max-width: 100%; height: auto; margin: 8px 0; border-radius: 8px; }
 .questao-html table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 0.85rem; }
-.questao-html td, .questao-html th { border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; }
+.questao-html td, .questao-html th { border: 1px solid #e5e7eb; padding: 6px 10px; color: inherit; }
 .questao-html p { margin-bottom: 8px; }
 .questao-html p:last-child { margin-bottom: 0; }
 

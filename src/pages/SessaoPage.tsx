@@ -104,7 +104,7 @@ export function SessaoPage() {
   const acertou = letraSelecionada === questaoAtual?.gabarito_letra
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#081529' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: '#f8f9fb' }}>
       {/* Header */}
       <header style={{ background: '#0C1E3D', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="max-w-xl mx-auto px-4 py-3">
@@ -116,7 +116,7 @@ export function SessaoPage() {
             >
               <IconX size={14} />
             </button>
-            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.12)' }}>
               <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progressoPct}%`, background: 'linear-gradient(90deg, #F5C33B 0%, #D4A017 100%)' }} />
             </div>
             <span className="text-xs font-semibold text-white shrink-0">
@@ -135,20 +135,20 @@ export function SessaoPage() {
         {(questaoAtual.banca || questaoAtual.ano || questaoAtual.assunto) && (
           <div className="flex flex-wrap gap-1.5">
             {questaoAtual.banca && (
-              <span className="px-2.5 py-1 rounded-lg text-xs font-semibold" style={{ background: 'rgba(245,195,59,0.1)', color: '#F5C33B', border: '1px solid rgba(245,195,59,0.2)' }}>{questaoAtual.banca}</span>
+              <span className="px-2.5 py-1 rounded-lg text-xs font-semibold" style={{ background: 'rgba(212,160,23,0.12)', color: '#92680a', border: '1px solid rgba(212,160,23,0.2)' }}>{questaoAtual.banca}</span>
             )}
             {questaoAtual.ano && (
-              <span className="px-2.5 py-1 rounded-lg text-xs" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.1)' }}>{questaoAtual.ano}</span>
+              <span className="px-2.5 py-1 rounded-lg text-xs" style={{ background: '#e5e7eb', color: '#4b5563' }}>{questaoAtual.ano}</span>
             )}
             {questaoAtual.assunto && (
-              <span className="px-2.5 py-1 rounded-lg text-xs max-w-[220px] truncate" style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)' }}>{questaoAtual.assunto}</span>
+              <span className="px-2.5 py-1 rounded-lg text-xs max-w-[220px] truncate" style={{ background: '#f3f4f6', color: '#6b7280' }}>{questaoAtual.assunto}</span>
             )}
           </div>
         )}
 
         {/* Enunciado */}
-        <div className="rounded-xl p-5" style={{ background: '#0C1E3D', border: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="questao-html text-white leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: questaoAtual.enunciado_html }} />
+        <div className="rounded-xl p-5" style={{ background: '#fff', border: '1px solid #e5e7eb' }}>
+          <div className="questao-html leading-relaxed text-sm" style={{ color: '#111827' }} dangerouslySetInnerHTML={{ __html: questaoAtual.enunciado_html }} />
         </div>
 
         {/* Alternativas */}
@@ -157,23 +157,23 @@ export function SessaoPage() {
             const selecionada = letraSelecionada === alt.letra
             const correta = alt.letra === questaoAtual.gabarito_letra
             const respondida = fase === 'respondida'
-            let style: React.CSSProperties = { background: '#0C1E3D', border: '1px solid rgba(255,255,255,0.09)', color: 'rgba(255,255,255,0.85)' }
+            let style: React.CSSProperties = { background: '#fff', border: '1px solid #e5e7eb', color: '#111827' }
             if (respondida) {
-              if (correta) style = { background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.4)', color: '#bbf7d0' }
-              else if (selecionada) style = { background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)', color: '#fecaca' }
-              else style = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.25)' }
+              if (correta) style = { background: '#f0fdf4', border: '1px solid #86efac', color: '#166534' }
+              else if (selecionada) style = { background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b' }
+              else style = { background: '#f9fafb', border: '1px solid #e5e7eb', color: '#9ca3af' }
             }
             return (
               <button key={alt.letra} onClick={() => registrarResposta(alt.letra)} disabled={respondida} className="w-full text-left rounded-xl px-4 py-3 transition-all disabled:cursor-default" style={style}>
                 <div className="flex items-start gap-3">
-                  <span className="font-bold text-sm shrink-0 mt-0.5 w-5" style={{ color: respondida && correta ? '#4ade80' : respondida && selecionada ? '#f87171' : '#F5C33B' }}>
+                  <span className="font-bold text-sm shrink-0 mt-0.5 w-5" style={{ color: respondida && correta ? '#16a34a' : respondida && selecionada ? '#dc2626' : '#D4A017' }}>
                     {alt.letra})
                   </span>
                   <span className="text-sm leading-relaxed flex-1">
                     {alt.html ? <span dangerouslySetInnerHTML={{ __html: alt.html }} /> : alt.texto}
                   </span>
-                  {respondida && correta && <IconCheck size={16} color="#4ade80" className="shrink-0 mt-0.5" />}
-                  {respondida && selecionada && !correta && <IconX size={16} color="#f87171" className="shrink-0 mt-0.5" />}
+                  {respondida && correta && <IconCheck size={16} color="#16a34a" className="shrink-0 mt-0.5" />}
+                  {respondida && selecionada && !correta && <IconX size={16} color="#dc2626" className="shrink-0 mt-0.5" />}
                 </div>
               </button>
             )
@@ -183,17 +183,17 @@ export function SessaoPage() {
         {/* Feedback */}
         {fase === 'respondida' && (
           <div className="rounded-xl p-4" style={acertou
-            ? { background: 'rgba(34,197,94,0.08)', borderLeft: '3px solid #22c55e' }
-            : { background: 'rgba(239,68,68,0.08)', borderLeft: '3px solid #ef4444' }
+            ? { background: '#f0fdf4', border: '1px solid #bbf7d0', borderLeft: '3px solid #22c55e' }
+            : { background: '#fef2f2', border: '1px solid #fecaca', borderLeft: '3px solid #ef4444' }
           }>
             <div className="flex items-center gap-2 mb-1.5">
               {acertou
-                ? <><IconCheck size={15} color="#4ade80" /><span className="font-semibold text-sm" style={{ color: '#86efac' }}>Resposta correta!</span></>
-                : <><IconX size={15} color="#f87171" /><span className="font-semibold text-sm" style={{ color: '#fca5a5' }}>Gabarito: {questaoAtual.gabarito_letra})</span></>
+                ? <><IconCheck size={15} color="#16a34a" /><span className="font-semibold text-sm" style={{ color: '#166534' }}>Resposta correta!</span></>
+                : <><IconX size={15} color="#dc2626" /><span className="font-semibold text-sm" style={{ color: '#991b1b' }}>Gabarito: {questaoAtual.gabarito_letra})</span></>
               }
             </div>
             {questaoAtual.comentario_html && (
-              <div className="questao-html text-sm leading-relaxed pt-3 mt-1" style={{ color: 'rgba(255,255,255,0.6)', borderTop: '1px solid rgba(255,255,255,0.07)' }}
+              <div className="questao-html text-sm leading-relaxed pt-3 mt-1" style={{ color: '#374151', borderTop: '1px solid #e5e7eb' }}
                 dangerouslySetInnerHTML={{ __html: questaoAtual.comentario_html }} />
             )}
           </div>
@@ -203,7 +203,7 @@ export function SessaoPage() {
       </main>
 
       {fase === 'respondida' && (
-        <div className="fixed bottom-0 left-0 right-0 px-4 py-3" style={{ background: '#0C1E3D', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="fixed bottom-0 left-0 right-0 px-4 py-3" style={{ background: '#fff', borderTop: '1px solid #e5e7eb' }}>
           <div className="max-w-xl mx-auto">
             <button onClick={proximaQuestao} className="btn-primary w-full flex items-center justify-center gap-2">
               {indice + 1 >= questoes.length ? 'Concluir disciplina' : 'Próxima questão'}
