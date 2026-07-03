@@ -41,106 +41,101 @@ export function HomePage() {
   const nomeExibido = usuario?.nome ?? user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? 'Usuário'
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header navy */}
-      <header className="bg-navy-900 px-4 py-5">
+    <div className="min-h-screen" style={{ background: '#000213' }}>
+      {/* Header */}
+      <header className="px-4 py-5" style={{ background: 'radial-gradient(35.05% 100% at 50% 0%, #001338 0%, #000213 100%)' }}>
         <div className="max-w-xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gold-400 rounded-xl flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(98.37deg, #FBE07A 0%, #F5C33B 45%, #EAA42A 100%)' }}>
               <span className="text-lg">📊</span>
             </div>
             <span className="font-bold text-white text-lg">IBGE Questões</span>
           </div>
-          <button onClick={signOut} className="text-navy-300 hover:text-white text-sm transition-colors">
+          <button onClick={signOut} className="text-sm transition-colors" style={{ color: 'rgba(255,255,255,0.5)' }}>
             Sair
           </button>
         </div>
       </header>
 
-      {/* Hero banner */}
-      <div className="bg-navy-800 px-4 pt-6 pb-10">
+      {/* Hero */}
+      <div className="px-4 pt-8 pb-10" style={{ background: 'radial-gradient(35.05% 100% at 50% 0%, #001338 0%, #000213 100%)' }}>
         <div className="max-w-xl mx-auto">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-navy-300 text-sm">Olá,</p>
+              <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Olá,</p>
               <h2 className="text-xl font-bold text-white">{nomeExibido}</h2>
             </div>
-            <div className="text-center bg-navy-700 rounded-2xl px-5 py-3">
-              <div className="text-3xl font-bold text-gold-400">{usuario?.streak ?? 0}</div>
-              <div className="text-navy-300 text-xs mt-0.5 flex items-center gap-1 justify-center">
+            <div className="text-center rounded-2xl px-5 py-3" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.13)' }}>
+              <div className="text-3xl font-black" style={{ color: '#F5C33B' }}>{usuario?.streak ?? 0}</div>
+              <div className="text-xs mt-0.5 flex items-center gap-1 justify-center" style={{ color: 'rgba(255,255,255,0.5)' }}>
                 🔥 dias seguidos
               </div>
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="mt-5 bg-navy-700 rounded-2xl p-4">
+          {/* Progress card */}
+          <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.13)' }}>
             <div className="flex justify-between text-sm mb-2">
-              <span className="text-navy-300">Progresso geral</span>
-              <span className="text-white font-semibold">
-                {totalRespondidas} questões · {pctAcerto}%
-              </span>
+              <span style={{ color: 'rgba(255,255,255,0.5)' }}>Progresso geral</span>
+              <span className="text-white font-semibold">{totalRespondidas} questões · {pctAcerto}%</span>
             </div>
-            <div className="h-2.5 bg-navy-600 rounded-full overflow-hidden">
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
               <div
-                className="h-full bg-gold-400 rounded-full transition-all duration-500"
-                style={{ width: `${pctAcerto}%` }}
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${pctAcerto}%`, background: 'linear-gradient(90deg, #FBE07A 0%, #F5C33B 100%)' }}
               />
             </div>
             {totalRespondidas > 0 && (
-              <p className="text-navy-400 text-xs mt-2">{totalAcertos} acertos de {totalRespondidas} respondidas</p>
+              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>{totalAcertos} acertos de {totalRespondidas} respondidas</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Content — cards sobrepostos ao banner */}
-      <main className="max-w-xl mx-auto px-4 -mt-4">
-        <div className="bg-white rounded-2xl shadow-lg border border-navy-100 overflow-hidden">
-          <div className="px-5 pt-5 pb-2">
-            <h3 className="text-base font-bold text-navy-900">Trilhas de estudo</h3>
+      {/* Trilhas */}
+      <main className="max-w-xl mx-auto px-4 py-6">
+        <p className="section-label mb-4">Trilhas de estudo</p>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="rounded-2xl h-20 animate-pulse" style={{ background: 'rgba(255,255,255,0.04)' }} />
+            ))}
           </div>
+        ) : trilhas.length === 0 ? (
+          <div className="text-center py-12" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Nenhuma trilha disponível no momento.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {trilhas.map((trilha) => (
+              <Link
+                key={trilha.id}
+                to={`/trilha/${trilha.slug}`}
+                className="flex items-center gap-4 rounded-2xl px-4 py-4 transition-all group"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(242,183,52,0.12)', border: '1px solid rgba(242,183,52,0.22)' }}>
+                  <span className="text-xl">📋</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-white truncate">{trilha.nome}</h4>
+                  {trilha.descricao && (
+                    <p className="text-sm truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{trilha.descricao}</p>
+                  )}
+                </div>
+                <span className="text-xl shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>›</span>
+              </Link>
+            ))}
+          </div>
+        )}
 
-          {loading ? (
-            <div className="p-5 space-y-3">
-              {[1, 2].map((i) => (
-                <div key={i} className="animate-pulse h-16 bg-gray-100 rounded-xl" />
-              ))}
-            </div>
-          ) : trilhas.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
-              Nenhuma trilha disponível no momento.
-            </div>
-          ) : (
-            <div className="p-3 space-y-2 pb-4">
-              {trilhas.map((trilha) => (
-                <Link
-                  key={trilha.id}
-                  to={`/trilha/${trilha.slug}`}
-                  className="flex items-center gap-4 bg-navy-50 hover:bg-navy-100 rounded-xl px-4 py-4 transition-colors group"
-                >
-                  <div className="w-11 h-11 bg-navy-900 rounded-xl flex items-center justify-center shrink-0">
-                    <span className="text-xl">📋</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-navy-900 truncate">{trilha.nome}</h4>
-                    {trilha.descricao && (
-                      <p className="text-sm text-navy-500 truncate mt-0.5">{trilha.descricao}</p>
-                    )}
-                  </div>
-                  <span className="text-navy-400 group-hover:text-navy-600 text-xl transition-colors">›</span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Dica */}
-        <div className="mt-4 bg-gold-400 rounded-2xl px-5 py-4 flex items-start gap-3 mb-6">
+        {/* Tip */}
+        <div className="mt-5 rounded-2xl px-5 py-4 flex items-start gap-3" style={{ background: 'rgba(245,195,59,0.08)', border: '1px solid rgba(245,195,59,0.22)' }}>
           <span className="text-2xl mt-0.5">💡</span>
           <div>
-            <p className="font-semibold text-navy-900 text-sm">Dica do dia</p>
-            <p className="text-navy-800 text-sm mt-0.5">
+            <p className="font-semibold text-sm" style={{ color: '#F5C33B' }}>Dica do dia</p>
+            <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
               Responda pelo menos 10 questões por dia para manter seu streak e fixar o conteúdo!
             </p>
           </div>

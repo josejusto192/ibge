@@ -25,6 +25,8 @@ interface Questao {
 
 type FaseResposta = 'aguardando' | 'respondida'
 
+const goldGrad = 'linear-gradient(98.37deg, #FBE07A 0%, #F5C33B 45%, #EAA42A 100%)'
+
 export function SessaoPage() {
   const { slug, disciplina } = useParams<{ slug: string; disciplina: string }>()
   const [searchParams] = useSearchParams()
@@ -56,18 +58,13 @@ export function SessaoPage() {
       ])
 
       setTrilhaNome((trilha as { nome: string } | null)?.nome ?? '')
-      const respondidaIds = new Set(
-        ((respondidas ?? []) as { questao_id: string }[]).map((r) => r.questao_id)
-      )
+      const respondidaIds = new Set(((respondidas ?? []) as { questao_id: string }[]).map((r) => r.questao_id))
 
       let query = supabase
         .from('questoes')
         .select('id, enunciado_html, alternativas, gabarito_letra, comentario_html, disciplina, assunto, tem_imagem, banca, ano')
-        .eq('disciplina', disciplinaDecoded)
-        .eq('anulada', false)
-        .eq('desatualizada', false)
-        .order('assunto', { ascending: true })
-        .order('id', { ascending: true })
+        .eq('disciplina', disciplinaDecoded).eq('anulada', false).eq('desatualizada', false)
+        .order('assunto', { ascending: true }).order('id', { ascending: true })
 
       if (nivelFiltro) query = query.eq('nivel_escolaridade', nivelFiltro)
       if (bancasFiltro.length > 0) query = query.in('banca', bancasFiltro)
@@ -110,12 +107,12 @@ export function SessaoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-navy-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#000213' }}>
         <div className="text-center">
-          <div className="w-16 h-16 bg-gold-400 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse" style={{ background: 'rgba(242,183,52,0.12)', border: '1px solid rgba(242,183,52,0.22)' }}>
             <span className="text-3xl">📖</span>
           </div>
-          <p className="text-navy-300">Carregando questões...</p>
+          <p style={{ color: 'rgba(255,255,255,0.5)' }}>Carregando questões...</p>
         </div>
       </div>
     )
@@ -123,14 +120,12 @@ export function SessaoPage() {
 
   if (questoes.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="card max-w-sm w-full text-center">
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#000213' }}>
+        <div className="rounded-2xl p-8 max-w-sm w-full text-center" style={{ background: '#080A1A', border: '1px solid rgba(255,255,255,0.13)' }}>
           <div className="text-5xl mb-4">🎉</div>
-          <h2 className="text-xl font-bold text-navy-900 mb-2">Tudo respondido!</h2>
-          <p className="text-gray-500 mb-6">Você respondeu todas as questões desta disciplina com os filtros selecionados.</p>
-          <button onClick={() => navigate(`/trilha/${slug}`)} className="btn-primary w-full">
-            Voltar para a trilha
-          </button>
+          <h2 className="text-xl font-bold text-white mb-2">Tudo respondido!</h2>
+          <p className="mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>Você respondeu todas as questões desta disciplina com os filtros selecionados.</p>
+          <button onClick={() => navigate(`/trilha/${slug}`)} className="btn-primary w-full">Voltar para a trilha</button>
         </div>
       </div>
     )
@@ -140,51 +135,46 @@ export function SessaoPage() {
   const acertou = letraSelecionada === questaoAtual?.gabarito_letra
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: '#000213' }}>
       {/* Header */}
-      <header className="bg-navy-900 px-4 pt-4 pb-3">
+      <header className="px-4 pt-4 pb-3" style={{ background: '#080A1A', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <div className="max-w-xl mx-auto">
           <div className="flex items-center gap-3 mb-3">
             <button
               onClick={() => navigate(`/trilha/${slug}/disciplina/${disciplina}${nivelFiltro ? `?nivel=${nivelFiltro}` : ''}`)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-navy-800 hover:bg-navy-700 text-white text-lg transition-colors shrink-0"
-            >
-              ✕
-            </button>
-            <div className="flex-1 h-2.5 bg-navy-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gold-400 rounded-full transition-all duration-300"
-                style={{ width: `${progressoPct}%` }}
-              />
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-white text-lg transition-colors shrink-0"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.13)' }}
+            >✕</button>
+            <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progressoPct}%`, background: goldGrad }} />
             </div>
-            <span className="text-sm text-navy-300 font-semibold whitespace-nowrap">
-              {indice + 1}<span className="text-navy-600">/{questoes.length}</span>
+            <span className="text-sm font-semibold whitespace-nowrap text-white">
+              {indice + 1}<span style={{ color: 'rgba(255,255,255,0.3)' }}>/{questoes.length}</span>
             </span>
           </div>
-          <p className="text-xs text-navy-500 truncate">
+          <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {trilhaNome} · {decodeURIComponent(disciplina!)}
-            {temFiltrosAtivos && <span className="text-gold-400 ml-1">· filtros ativos</span>}
+            {temFiltrosAtivos && <span style={{ color: '#F5C33B' }} className="ml-1">· filtros ativos</span>}
           </p>
         </div>
       </header>
 
-      {/* Questão */}
       <main className="flex-1 max-w-xl mx-auto w-full px-4 py-5 flex flex-col gap-4">
         {/* Tags */}
         {(questaoAtual.banca || questaoAtual.ano || questaoAtual.assunto) && (
           <div className="flex flex-wrap gap-2 text-xs">
             {questaoAtual.banca && (
-              <span className="bg-navy-100 text-navy-700 px-2.5 py-1 rounded-lg font-semibold">
+              <span className="px-2.5 py-1 rounded-lg font-semibold" style={{ background: 'rgba(245,195,59,0.12)', color: '#F5C33B', border: '1px solid rgba(245,195,59,0.22)' }}>
                 {questaoAtual.banca}
               </span>
             )}
             {questaoAtual.ano && (
-              <span className="bg-navy-100 text-navy-600 px-2.5 py-1 rounded-lg">
+              <span className="px-2.5 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.13)' }}>
                 {questaoAtual.ano}
               </span>
             )}
             {questaoAtual.assunto && (
-              <span className="bg-gray-100 text-gray-500 px-2.5 py-1 rounded-lg max-w-[200px] truncate">
+              <span className="px-2.5 py-1 rounded-lg max-w-[200px] truncate" style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 {questaoAtual.assunto}
               </span>
             )}
@@ -192,11 +182,8 @@ export function SessaoPage() {
         )}
 
         {/* Enunciado */}
-        <div className="bg-white border border-navy-100 rounded-2xl p-5 shadow-sm">
-          <div
-            className="questao-html text-navy-900 leading-relaxed text-sm"
-            dangerouslySetInnerHTML={{ __html: questaoAtual.enunciado_html }}
-          />
+        <div className="rounded-2xl p-5" style={{ background: '#080A1A', border: '1px solid rgba(255,255,255,0.13)' }}>
+          <div className="questao-html text-white leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: questaoAtual.enunciado_html }} />
         </div>
 
         {/* Alternativas */}
@@ -206,11 +193,11 @@ export function SessaoPage() {
             const correta = alt.letra === questaoAtual.gabarito_letra
             const respondida = fase === 'respondida'
 
-            let estilo = 'border-2 border-navy-100 bg-white text-navy-800 hover:border-navy-400 hover:bg-navy-50'
+            let style: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.85)' }
             if (respondida) {
-              if (correta) estilo = 'border-2 border-green-500 bg-green-50 text-green-900'
-              else if (selecionada) estilo = 'border-2 border-red-400 bg-red-50 text-red-900'
-              else estilo = 'border-2 border-navy-100 bg-gray-50 text-gray-400'
+              if (correta) style = { background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.5)', color: '#dcfce7' }
+              else if (selecionada) style = { background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.5)', color: '#fecaca' }
+              else style = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }
             }
 
             return (
@@ -218,19 +205,18 @@ export function SessaoPage() {
                 key={alt.letra}
                 onClick={() => registrarResposta(alt.letra)}
                 disabled={respondida}
-                className={`w-full text-left rounded-xl px-4 py-3 transition-all ${estilo} disabled:cursor-default`}
+                className="w-full text-left rounded-xl px-4 py-3 transition-all disabled:cursor-default"
+                style={style}
               >
                 <div className="flex items-start gap-3">
-                  <span className={`font-bold text-sm shrink-0 mt-0.5 w-5 ${
-                    respondida && correta ? 'text-green-600' : respondida && selecionada ? 'text-red-500' : 'text-navy-500'
-                  }`}>
+                  <span className="font-bold text-sm shrink-0 mt-0.5 w-5" style={respondida && correta ? { color: '#4ade80' } : respondida && selecionada ? { color: '#f87171' } : { color: '#F5C33B' }}>
                     {alt.letra})
                   </span>
                   <span className="text-sm leading-relaxed flex-1">
                     {alt.html ? <span dangerouslySetInnerHTML={{ __html: alt.html }} /> : alt.texto}
                   </span>
-                  {respondida && correta && <span className="shrink-0 text-green-500 font-bold">✓</span>}
-                  {respondida && selecionada && !correta && <span className="shrink-0 text-red-400 font-bold">✕</span>}
+                  {respondida && correta && <span className="shrink-0 font-bold" style={{ color: '#4ade80' }}>✓</span>}
+                  {respondida && selecionada && !correta && <span className="shrink-0 font-bold" style={{ color: '#f87171' }}>✕</span>}
                 </div>
               </button>
             )
@@ -239,27 +225,21 @@ export function SessaoPage() {
 
         {/* Feedback */}
         {fase === 'respondida' && (
-          <div className={`rounded-2xl p-5 border-l-4 ${
-            acertou
-              ? 'bg-green-50 border-l-green-500'
-              : 'bg-red-50 border-l-red-400'
-          }`}>
+          <div className="rounded-2xl p-5" style={acertou
+            ? { background: 'rgba(34,197,94,0.08)', borderLeft: '4px solid #22c55e' }
+            : { background: 'rgba(239,68,68,0.08)', borderLeft: '4px solid #ef4444' }
+          }>
             <div className="flex items-center gap-2 mb-1">
               {acertou ? (
-                <>
-                  <span className="text-green-600 text-xl font-bold">✓</span>
-                  <span className="font-bold text-green-800">Correto!</span>
-                </>
+                <><span className="text-xl font-bold" style={{ color: '#4ade80' }}>✓</span><span className="font-bold" style={{ color: '#86efac' }}>Correto!</span></>
               ) : (
-                <>
-                  <span className="text-red-500 text-xl font-bold">✕</span>
-                  <span className="font-bold text-red-700">Gabarito: {questaoAtual.gabarito_letra})</span>
-                </>
+                <><span className="text-xl font-bold" style={{ color: '#f87171' }}>✕</span><span className="font-bold" style={{ color: '#fca5a5' }}>Gabarito: {questaoAtual.gabarito_letra})</span></>
               )}
             </div>
             {questaoAtual.comentario_html && (
               <div
-                className="questao-html text-sm text-gray-700 leading-relaxed mt-3 pt-3 border-t border-gray-200"
+                className="questao-html text-sm leading-relaxed mt-3 pt-3"
+                style={{ color: 'rgba(255,255,255,0.7)', borderTop: '1px solid rgba(255,255,255,0.1)' }}
                 dangerouslySetInnerHTML={{ __html: questaoAtual.comentario_html }}
               />
             )}
@@ -269,9 +249,8 @@ export function SessaoPage() {
         {fase === 'respondida' && <div className="h-16" />}
       </main>
 
-      {/* Botão próxima */}
       {fase === 'respondida' && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-navy-100 px-4 py-4 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-0 px-4 py-4" style={{ background: '#000213', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="max-w-xl mx-auto">
             <button onClick={proximaQuestao} className="btn-primary w-full text-base">
               {indice + 1 >= questoes.length ? 'Concluir disciplina' : 'Próxima questão →'}
