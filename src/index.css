@@ -2,86 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-base: #000213;
-  --bg-section: #001338;
-  --bg-card: #080A1A;
-  --border-subtle: rgba(255, 255, 255, 0.13);
-  --border-medium: rgba(255, 255, 255, 0.24);
-  --gold-from: #FBE07A;
-  --gold-mid: #F5C33B;
-  --gold-to: #EAA42A;
-  --text-muted: rgba(255, 255, 255, 0.7);
-  --text-label: #F6D365;
-}
-
 @layer components {
   .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 24px;
-    font-weight: 800;
-    font-size: 0.875rem;
-    letter-spacing: 0.717px;
-    text-transform: uppercase;
-    color: #000312;
-    background: linear-gradient(98.37deg, #FBE07A 0%, #F5C33B 45%, #EAA42A 100%);
-    border: 1px solid rgba(255, 255, 255, 0.51);
-    border-radius: 15px;
-    box-shadow: -6px 4px 17px rgba(0,0,0,0.26), -26px 16px 30px rgba(0,0,0,0.22), -58px 37px 41px rgba(0,0,0,0.13);
-    transition: opacity 0.15s, transform 0.1s;
-    cursor: pointer;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #F5C33B 0%, #D4A017 100%);
+    color: #081529;
+    border: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 12px rgba(213,160,23,0.25);
   }
-  .btn-primary:hover { opacity: 0.92; }
-  .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 6px 18px rgba(213,160,23,0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
 
   .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 24px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: rgba(255,255,255,0.8);
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 15px;
-    transition: background 0.15s;
-    cursor: pointer;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all;
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.12);
   }
-  .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.11); color: #fff; }
 
   .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 16px;
-    box-shadow: -10px 8px 29px rgba(0,0,0,0.15), -40px 34px 53px rgba(0,0,0,0.13);
-    padding: 24px;
+    @apply rounded-2xl p-5;
+    background: #0C1E3D;
+    border: 1px solid rgba(255,255,255,0.08);
   }
 
-  .section-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2.534px;
-    text-transform: uppercase;
-    color: var(--text-label);
-  }
-
-  .heading-gradient {
-    background: linear-gradient(90deg, #FFFDF8 10.25%, #C3D2F8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .tag {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium;
   }
 }
 
-.questao-html img { max-width: 100%; height: auto; margin: 8px 0; }
-.questao-html table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 0.875rem; }
-.questao-html td, .questao-html th { border: 1px solid rgba(255,255,255,0.15); padding: 6px 10px; }
+.questao-html img { max-width: 100%; height: auto; margin: 8px 0; border-radius: 8px; }
+.questao-html table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 0.85rem; }
+.questao-html td, .questao-html th { border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; }
 .questao-html p { margin-bottom: 8px; }
+.questao-html p:last-child { margin-bottom: 0; }
 
 * { box-sizing: border-box; }
-body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #000213; color: #fff; }
+body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #081529; color: #fff; -webkit-font-smoothing: antialiased; }
 #root { min-height: 100vh; }
