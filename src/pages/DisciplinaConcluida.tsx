@@ -13,23 +13,14 @@ export function DisciplinaConcluidaPage() {
   useEffect(() => {
     if (!user) return
     const load = async () => {
-      const disciplinaDecoded = decodeURIComponent(disciplina!)
-
       const { data: questoes } = await supabase
-        .from('questoes')
-        .select('id')
-        .eq('disciplina', disciplinaDecoded)
-        .eq('anulada', false)
-        .eq('desatualizada', false)
-
+        .from('questoes').select('id')
+        .eq('disciplina', decodeURIComponent(disciplina!))
+        .eq('anulada', false).eq('desatualizada', false)
       const ids = ((questoes ?? []) as { id: string }[]).map((q) => q.id)
-
       const { data: prog } = await supabase
-        .from('progresso_questoes')
-        .select('acertou')
-        .eq('usuario_id', user.id)
-        .in('questao_id', ids)
-
+        .from('progresso_questoes').select('acertou')
+        .eq('usuario_id', user.id).in('questao_id', ids)
       const rows = (prog ?? []) as { acertou: boolean }[]
       setTotal(rows.length)
       setAcertos(rows.filter((p) => p.acertou).length)
@@ -38,32 +29,51 @@ export function DisciplinaConcluidaPage() {
   }, [disciplina, user])
 
   const pct = total > 0 ? Math.round((acertos / total) * 100) : 0
+  const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚'
+  const msg = pct >= 80 ? 'Excelente resultado!' : pct >= 60 ? 'Bom trabalho!' : 'Continue estudando!'
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="card max-w-sm w-full text-center">
-        <div className="text-6xl mb-4">{pct >= 70 ? '🏆' : pct >= 50 ? '👍' : '📚'}</div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">Disciplina concluída!</h2>
-        <p className="text-gray-500 mb-6">{decodeURIComponent(disciplina!)}</p>
+    <div className="min-h-screen bg-navy-900 flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        {/* Card resultado */}
+        <div className="bg-white rounded-3xl p-8 text-center shadow-2xl">
+          <div className="w-20 h-20 bg-gold-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-4xl">{emoji}</span>
+          </div>
 
-        <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
-          <div className="text-4xl font-bold text-blue-600 mb-1">{pct}%</div>
-          <div className="text-gray-500 text-sm">{acertos} acertos de {total} questões</div>
+          <h2 className="text-2xl font-bold text-navy-900 mb-1">Disciplina concluída!</h2>
+          <p className="text-navy-400 text-sm mb-6">{decodeURIComponent(disciplina!)}</p>
+
+          {/* Resultado em destaque */}
+          <div className="bg-navy-50 rounded-2xl p-5 mb-6">
+            <div className="text-5xl font-bold text-navy-900 mb-1">{pct}%</div>
+            <div className="text-navy-500 text-sm">{msg}</div>
+            <div className="mt-3 h-2 bg-navy-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gold-400 rounded-full transition-all duration-1000"
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-navy-400 mt-1.5">
+              <span>{acertos} acertos</span>
+              <span>{total - acertos} erros</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <button onClick={() => navigate(`/trilha/${slug}`)} className="btn-primary w-full">
+              Continuar trilha
+            </button>
+            <button onClick={() => navigate('/')} className="btn-secondary w-full">
+              Ir para o início
+            </button>
+          </div>
         </div>
 
-        <div className="space-y-3">
-          <button
-            onClick={() => navigate(`/trilha/${slug}`)}
-            className="btn-primary w-full"
-          >
-            Continuar trilha
-          </button>
-          <button
-            onClick={() => navigate('/')}
-            className="btn-secondary w-full"
-          >
-            Ir para o início
-          </button>
+        {/* Streak reminder */}
+        <div className="mt-4 bg-navy-800 rounded-2xl px-5 py-4 flex items-center gap-3">
+          <span className="text-2xl">🔥</span>
+          <p className="text-navy-300 text-sm">Continue amanhã para manter seu streak!</p>
         </div>
       </div>
     </div>
