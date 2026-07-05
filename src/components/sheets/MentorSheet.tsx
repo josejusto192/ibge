@@ -12,7 +12,7 @@ export default function MentorSheet() {
     <>
       <div onClick={close} className="absolute inset-0 z-[28] bg-[rgba(11,31,77,.55)]" />
       <div
-        className="scr absolute inset-x-0 bottom-0 z-[29] max-h-[88%] overflow-y-auto rounded-t-[26px] rounded-b-[34px] bg-surface pb-6 animate-sheet-up"
+        className="scr absolute inset-x-0 bottom-0 z-[29] max-h-[88%] overflow-y-auto rounded-t-[26px] bg-surface pb-6 animate-sheet-up"
       >
         <div
           className="relative rounded-b-[24px] rounded-t-[26px] p-[22px_22px_24px]"

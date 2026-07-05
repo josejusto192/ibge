@@ -38,7 +38,7 @@ export default function ReferralSheet({ onClose }: { onClose: () => void }) {
   return (
     <>
       <div onClick={onClose} className="absolute inset-0 z-[32] bg-[rgba(11,31,77,.5)]" />
-      <div className="scr absolute inset-x-0 bottom-0 z-[33] max-h-[88%] overflow-y-auto rounded-t-[26px] rounded-b-[34px] bg-surface p-[8px_20px_26px] animate-sheet-up">
+      <div className="scr absolute inset-x-0 bottom-0 z-[33] max-h-[88%] overflow-y-auto rounded-t-[26px] bg-surface p-[8px_20px_26px] animate-sheet-up">
         <div className="mx-auto mb-4 mt-2 h-[5px] w-[42px] rounded-[3px] bg-border" />
         <div className="mb-1 flex items-center justify-between">
           <div className="font-display text-[19px] font-extrabold text-ink">Indique e ganhe</div>

@@ -9,7 +9,7 @@ export default function ReportSheet({ onClose, onSubmit }: ReportSheetProps) {
   return (
     <>
       <div onClick={onClose} className="absolute inset-0 z-[25] bg-[rgba(11,31,77,.5)]" />
-      <div className="absolute inset-x-0 bottom-0 z-[26] rounded-t-[26px] rounded-b-[34px] bg-surface p-[8px_20px_24px] animate-sheet-up">
+      <div className="absolute inset-x-0 bottom-0 z-[26] rounded-t-[26px] bg-surface p-[8px_20px_24px] animate-sheet-up">
         <div className="mx-auto mb-4 mt-2 h-[5px] w-[42px] rounded-[3px] bg-border" />
         <div className="font-display text-[18px] font-extrabold text-ink">Reportar questão</div>
         <div className="mt-0.5 font-sans text-[12.5px] font-semibold text-text2">Ajude a manter o banco de questões correto.</div>
