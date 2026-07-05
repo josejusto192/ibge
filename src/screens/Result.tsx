@@ -4,7 +4,7 @@ import { useAppData } from '../contexts/AppDataContext';
 import { useAppState } from '../state/AppStateContext';
 
 interface ResultLocationState {
-  disciplina?: string;
+  moduloTitulo?: string;
   trilhaNome?: string;
 }
 
@@ -13,7 +13,7 @@ export default function Result() {
   const { usuario } = useAppData();
   const navigate = useNavigate();
   const location = useLocation();
-  const { disciplina, trilhaNome } = (location.state as ResultLocationState) ?? {};
+  const { moduloTitulo, trilhaNome } = (location.state as ResultLocationState) ?? {};
   const { sessionAnswered, sessionCorrect, gained } = state.session;
   const accuracy = sessionAnswered ? Math.round((sessionCorrect / sessionAnswered) * 100) : 0;
 
@@ -29,7 +29,7 @@ export default function Result() {
       </div>
       <div className="mt-6.5 font-display text-[26px] font-extrabold text-ink">Módulo concluído!</div>
       <div className="mt-1.5 font-sans text-[14px] font-semibold text-text2">
-        {disciplina ?? 'Módulo'}
+        {moduloTitulo ?? 'Módulo'}
         {trilhaNome ? ` · ${trilhaNome}` : ''}
       </div>
 

@@ -44,10 +44,6 @@ export function reducer(state: AppState, action: Action): AppState {
         aiMessages: [],
         aiTyping: false,
       };
-    case 'SET_FILTER':
-      return { ...state, filters: { ...state.filters, [action.key]: action.value } };
-    case 'CLEAR_FILTERS':
-      return { ...state, filters: { banca: '' } };
     case 'TOGGLE_TIMER':
       return { ...state, timerOn: !state.timerOn };
     case 'TICK_TIMER':

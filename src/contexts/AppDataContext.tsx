@@ -1,21 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useUsuario, type Usuario } from '../hooks/useUsuario';
-import {
-  fetchDailyDone,
-  fetchProgressoModulos,
-  fetchTrilhaDisciplinas,
-  fetchTrilhas,
-  type TrilhaRow,
-} from '../lib/queries';
+import { fetchDailyDone, fetchModulos, fetchProgressoModulos, fetchTrilhas, type ModuloRow, type TrilhaRow } from '../lib/queries';
 import type { Database } from '../lib/database.types';
 import type { Modulo, ModuloStatus } from '../data/types';
 
 type UsuarioUpdate = Database['public']['Tables']['usuarios']['Update'];
 
-function computeModules(disciplinas: { disciplina: string; ordem: number }[], progresso: Map<string, { acertos: number; total: number }>): Modulo[] {
+function computeModules(modulos: ModuloRow[], progresso: Map<number, { acertos: number; total: number }>): Modulo[] {
   let foundCurrent = false;
-  return disciplinas.map((d) => {
-    const prog = progresso.get(d.disciplina);
+  return modulos.map((m) => {
+    const prog = progresso.get(m.id);
     let status: ModuloStatus;
     if (prog) status = 'done';
     else if (!foundCurrent) {
@@ -24,7 +18,7 @@ function computeModules(disciplinas: { disciplina: string; ordem: number }[], pr
     } else {
       status = 'locked';
     }
-    return { disciplina: d.disciplina, ordem: d.ordem, status, acertos: prog?.acertos ?? 0, total: prog?.total ?? 0 };
+    return { id: m.id, titulo: m.titulo, ordem: m.ordem, status, acertos: prog?.acertos ?? 0, total: prog?.total ?? 0 };
   });
 }
 
@@ -61,11 +55,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const refreshModules = useCallback(async () => {
     if (!usuario || !activeTrilha) return;
-    const [disciplinas, progresso] = await Promise.all([
-      fetchTrilhaDisciplinas(activeTrilha.id),
-      fetchProgressoModulos(usuario.id, activeTrilha.id),
-    ]);
-    setModules(computeModules(disciplinas, progresso));
+    const modulos = await fetchModulos(activeTrilha.id);
+    const progresso = await fetchProgressoModulos(
+      usuario.id,
+      modulos.map((m) => m.id)
+    );
+    setModules(computeModules(modulos, progresso));
   }, [usuario, activeTrilha]);
 
   useEffect(() => {

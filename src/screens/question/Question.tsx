@@ -2,7 +2,7 @@ import { ArrowRight, X } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../../contexts/AppDataContext';
-import { fetchQuestoesPorDisciplina, recordResposta, upsertProgressoModulo } from '../../lib/queries';
+import { fetchQuestoesDoModulo, recordResposta, upsertProgressoModulo } from '../../lib/queries';
 import { formatTimer } from '../../lib/format';
 import { sanitizeHtml } from '../../lib/sanitizeHtml';
 import { useAppState } from '../../state/AppStateContext';
@@ -21,16 +21,16 @@ export default function Question() {
   const [questoes, setQuestoes] = useState<Questao[] | null>(null);
   const [finalizing, setFinalizing] = useState(false);
 
-  const disciplina = modules.find((m) => m.status === 'current')?.disciplina ?? null;
+  const currentModulo = modules.find((m) => m.status === 'current') ?? null;
+  const currentModuloId = currentModulo?.id;
 
   useEffect(() => {
-    if (!disciplina) return;
+    if (!currentModuloId) return;
     setQuestoes(null);
-    fetchQuestoesPorDisciplina(disciplina, state.filters.banca || null).then(setQuestoes);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disciplina]);
+    fetchQuestoesDoModulo(currentModuloId).then(setQuestoes);
+  }, [currentModuloId]);
 
-  if (!disciplina) {
+  if (!currentModulo) {
     return (
       <div className="flex flex-1 items-center justify-center p-6 text-center font-sans text-[13.5px] font-semibold text-text2">
         Nenhum módulo disponível para começar agora.
@@ -49,10 +49,7 @@ export default function Question() {
   if (!questoes.length) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
-        <div className="font-sans text-[13.5px] font-semibold text-text2">
-          Nenhuma questão encontrada para {disciplina}
-          {state.filters.banca ? ` na banca ${state.filters.banca}` : ''}.
-        </div>
+        <div className="font-sans text-[13.5px] font-semibold text-text2">Este módulo ainda não tem questões cadastradas.</div>
         <button onClick={() => navigate('/trilha')} className="font-sans text-[13px] font-extrabold text-blue">
           Voltar para a trilha
         </button>
@@ -92,16 +89,16 @@ export default function Question() {
       setAiOpen(false);
       return;
     }
-    if (usuario && activeTrilha && disciplina && !finalizing) {
+    if (usuario && currentModuloId && !finalizing) {
       setFinalizing(true);
       try {
-        await upsertProgressoModulo(usuario.id, activeTrilha.id, disciplina, state.session.sessionCorrect, state.session.sessionAnswered);
+        await upsertProgressoModulo(usuario.id, currentModuloId, state.session.sessionCorrect, state.session.sessionAnswered);
         await refreshModules();
       } catch (err) {
         console.error('Falha ao gravar progresso do módulo', err);
       }
     }
-    navigate('/resultado', { state: { disciplina, trilhaNome: activeTrilha?.nome } });
+    navigate('/resultado', { state: { moduloTitulo: currentModulo?.titulo, trilhaNome: activeTrilha?.nome } });
   }
 
   function submitReport(reason: string) {

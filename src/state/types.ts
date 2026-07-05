@@ -29,12 +29,6 @@ export interface QuestionSession {
   gained: number;
 }
 
-// Só "banca" sobrevive como filtro de usuário: a disciplina já é o próprio
-// módulo da trilha (sequencial), então não faz sentido como filtro solto.
-export interface FiltersState {
-  banca: string;
-}
-
 export interface AiMessage {
   role: 'user' | 'ai';
   text: string;
@@ -42,7 +36,6 @@ export interface AiMessage {
 
 export interface AppState {
   ob: OnboardingState;
-  filters: FiltersState;
   session: QuestionSession;
   timerOn: boolean;
   seconds: number;
@@ -70,7 +63,6 @@ export const initialAppState: AppState = {
     authError: null,
     submitting: false,
   },
-  filters: { banca: '' },
   session: { qIndex: 0, selected: null, answered: false, sessionCorrect: 0, sessionAnswered: 0, gained: 0 },
   timerOn: false,
   seconds: 1500,
@@ -90,8 +82,6 @@ export type Action =
   | { type: 'MARK_ANSWERED'; correct: boolean }
   | { type: 'NEXT_QUESTION' }
   | { type: 'RESET_SESSION' }
-  | { type: 'SET_FILTER'; key: keyof FiltersState; value: string }
-  | { type: 'CLEAR_FILTERS' }
   | { type: 'TOGGLE_TIMER' }
   | { type: 'TICK_TIMER' }
   | { type: 'SET_MENTOR_OPEN'; open: boolean }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { useAppState } from '../../../state/AppStateContext';
 import { supabase } from '../../../lib/supabase';
-import { fetchTrilhaDisciplinas, registerReferral, resolveReferralCode } from '../../../lib/queries';
+import { fetchModulos, registerReferral, resolveReferralCode } from '../../../lib/queries';
 
 interface PlanStepProps {
   planConcurso: string;
@@ -23,7 +23,7 @@ export default function PlanStep({ planConcurso, planMeta, planWeeks, refCode }:
 
   useEffect(() => {
     if (ob.concurso == null) return;
-    fetchTrilhaDisciplinas(ob.concurso).then((d) => setModulos(d.length));
+    fetchModulos(ob.concurso).then((d) => setModulos(d.length));
   }, [ob.concurso]);
 
   async function finish() {

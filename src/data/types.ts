@@ -33,11 +33,12 @@ export interface Questao {
 
 export type ModuloStatus = 'locked' | 'current' | 'done';
 
-// Um "módulo" na trilha é uma disciplina (trilha_disciplinas.disciplina).
-// Não existe módulo "boss"/simulado no schema real — só disciplinas em
-// sequência. status/acertos/total vêm de progresso_modulos.
+// Um "módulo" é um nó do caminho da trilha, curado pelo admin: título livre
+// e uma lista de questões escolhidas a dedo (modulo_questoes), não mais uma
+// disciplina inteira. status/acertos/total vêm de progresso_modulos.
 export interface Modulo {
-  disciplina: string;
+  id: number;
+  titulo: string;
   ordem: number;
   status: ModuloStatus;
   acertos: number;

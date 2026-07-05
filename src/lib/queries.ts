@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Alternativa } from './database.types';
+import type { Alternativa, ModuloQuestaoRow } from './database.types';
 import type { Questao } from '../data/types';
 
 export interface TrilhaRow {
@@ -17,17 +17,15 @@ export async function fetchTrilhas(): Promise<TrilhaRow[]> {
   return data ?? [];
 }
 
-export interface DisciplinaRow {
-  disciplina: string;
+export interface ModuloRow {
+  id: number;
+  trilha_id: number;
+  titulo: string;
   ordem: number;
 }
 
-export async function fetchTrilhaDisciplinas(trilhaId: number): Promise<DisciplinaRow[]> {
-  const { data, error } = await supabase
-    .from('trilha_disciplinas')
-    .select('disciplina, ordem')
-    .eq('trilha_id', trilhaId)
-    .order('ordem');
+export async function fetchModulos(trilhaId: number): Promise<ModuloRow[]> {
+  const { data, error } = await supabase.from('modulos').select('*').eq('trilha_id', trilhaId).order('ordem');
   if (error) throw error;
   return data ?? [];
 }
@@ -37,50 +35,27 @@ export interface ModuloProgresso {
   total: number;
 }
 
-export async function fetchProgressoModulos(usuarioId: string, trilhaId: number): Promise<Map<string, ModuloProgresso>> {
+export async function fetchProgressoModulos(usuarioId: string, moduloIds: number[]): Promise<Map<number, ModuloProgresso>> {
+  const map = new Map<number, ModuloProgresso>();
+  if (!moduloIds.length) return map;
   const { data, error } = await supabase
     .from('progresso_modulos')
-    .select('disciplina, acertos, total')
+    .select('modulo_id, acertos, total')
     .eq('usuario_id', usuarioId)
-    .eq('trilha_id', trilhaId);
+    .in('modulo_id', moduloIds);
   if (error) throw error;
-  const map = new Map<string, ModuloProgresso>();
-  for (const row of data ?? []) map.set(row.disciplina, { acertos: row.acertos, total: row.total });
+  for (const row of data ?? []) map.set(row.modulo_id, { acertos: row.acertos, total: row.total });
   return map;
 }
 
-export async function upsertProgressoModulo(usuarioId: string, trilhaId: number, disciplina: string, acertos: number, total: number) {
+export async function upsertProgressoModulo(usuarioId: string, moduloId: number, acertos: number, total: number) {
   const { error } = await supabase
     .from('progresso_modulos')
-    .upsert({ usuario_id: usuarioId, trilha_id: trilhaId, disciplina, acertos, total }, { onConflict: 'usuario_id,trilha_id,disciplina' });
+    .upsert({ usuario_id: usuarioId, modulo_id: moduloId, acertos, total }, { onConflict: 'usuario_id,modulo_id' });
   if (error) throw error;
 }
 
-// Cada "módulo" é uma rodada de N questões da disciplina. Para manter o MVP
-// simples, a seleção é determinística (ordenada por id) em vez de aleatória —
-// dá pra evoluir para excluir questões já respondidas / randomizar depois.
-const QUESTOES_POR_MODULO = 8;
-
-function mapQuestaoRow(row: {
-  id: string;
-  enunciado: string | null;
-  enunciado_html: string | null;
-  tem_imagem: boolean;
-  gabarito_letra: string | null;
-  comentario: string | null;
-  comentario_html: string | null;
-  banca: string | null;
-  ano: number | null;
-  orgao: string | null;
-  orgao_nome: string | null;
-  cargo: string | null;
-  disciplina: string;
-  nivel_escolaridade: string | null;
-  tipo: string | null;
-  anulada: boolean;
-  desatualizada: boolean;
-  alternativas: Alternativa[];
-}): Questao {
+function mapQuestaoRow(row: ModuloQuestaoRow): Questao {
   return {
     id: row.id,
     enunciado: row.enunciado ?? '',
@@ -99,22 +74,14 @@ function mapQuestaoRow(row: {
     tipo: row.tipo ?? undefined,
     anulada: row.anulada,
     desatualizada: row.desatualizada,
-    alternativas: (row.alternativas ?? []).map((a) => ({ letra: a.letra, texto: a.texto, html: a.html ?? undefined, correta: a.correta })),
+    alternativas: (row.alternativas ?? []).map((a: Alternativa) => ({ letra: a.letra, texto: a.texto, html: a.html ?? undefined, correta: a.correta })),
   };
 }
 
-export async function fetchQuestoesPorDisciplina(disciplina: string, banca: string | null): Promise<Questao[]> {
-  let query = supabase
-    .from('questoes')
-    .select(
-      'id, enunciado, enunciado_html, tem_imagem, gabarito_letra, comentario, comentario_html, banca, ano, orgao, orgao_nome, cargo, disciplina, nivel_escolaridade, tipo, anulada, desatualizada, alternativas'
-    )
-    .eq('disciplina', disciplina)
-    .eq('anulada', false)
-    .order('id')
-    .limit(QUESTOES_POR_MODULO);
-  if (banca) query = query.eq('banca', banca);
-  const { data, error } = await query;
+// Conteúdo das questões escolhidas a dedo pelo admin para este módulo
+// (via RPC — `questoes` em si só é legível por admin, ver migration 004).
+export async function fetchQuestoesDoModulo(moduloId: number): Promise<Questao[]> {
+  const { data, error } = await supabase.rpc('get_modulo_questoes', { p_modulo_id: moduloId });
   if (error) throw error;
   return (data ?? []).map(mapQuestaoRow);
 }
@@ -144,12 +111,13 @@ export interface StatsData {
 }
 
 export async function fetchStats(usuarioId: string): Promise<StatsData> {
-  const { data, error } = await supabase
-    .from('progresso_questoes')
-    .select('acertou, respondido_em, questoes(disciplina)')
-    .eq('usuario_id', usuarioId);
-  if (error) throw error;
-  const rows = data ?? [];
+  const [respostasResult, porDisciplinaResult] = await Promise.all([
+    supabase.from('progresso_questoes').select('acertou, respondido_em').eq('usuario_id', usuarioId),
+    supabase.rpc('get_meu_desempenho_por_disciplina'),
+  ]);
+  if (respostasResult.error) throw respostasResult.error;
+  if (porDisciplinaResult.error) throw porDisciplinaResult.error;
+  const rows = respostasResult.data ?? [];
 
   const totalRespondidas = rows.length;
   const taxaAcerto = totalRespondidas ? Math.round((rows.filter((r) => r.acertou).length / totalRespondidas) * 100) : 0;
@@ -162,18 +130,9 @@ export async function fetchStats(usuarioId: string): Promise<StatsData> {
     return rows.filter((r) => r.respondido_em.slice(0, 10) === key).length;
   });
 
-  const byDisciplina = new Map<string, { acertos: number; total: number }>();
-  for (const r of rows) {
-    const disciplina = (r.questoes as unknown as { disciplina: string } | null)?.disciplina;
-    if (!disciplina) continue;
-    const entry = byDisciplina.get(disciplina) ?? { acertos: 0, total: 0 };
-    entry.total += 1;
-    if (r.acertou) entry.acertos += 1;
-    byDisciplina.set(disciplina, entry);
-  }
-  const porDisciplina = Array.from(byDisciplina.entries()).map(([disciplina, { acertos, total }]) => ({
-    disciplina,
-    pct: total ? Math.round((acertos / total) * 100) : 0,
+  const porDisciplina = (porDisciplinaResult.data ?? []).map((d) => ({
+    disciplina: d.disciplina,
+    pct: d.total ? Math.round((d.acertos / d.total) * 100) : 0,
   }));
 
   return { totalRespondidas, taxaAcerto, ultimos7Dias, porDisciplina };

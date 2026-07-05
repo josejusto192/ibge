@@ -13,6 +13,13 @@ import Result from './screens/Result';
 import Stats from './screens/Stats';
 import Ranking from './screens/Ranking';
 import Profile from './screens/profile/Profile';
+import AdminGuard from './admin/AdminGuard';
+import AdminTrilhasPage from './admin/AdminTrilhasPage';
+import AdminTrilhaDetailPage from './admin/AdminTrilhaDetailPage';
+import AdminModuloPage from './admin/AdminModuloPage';
+import AdminQuestoesBancoPage from './admin/AdminQuestoesBancoPage';
+import AdminQuestaoReviewPage from './admin/AdminQuestaoReviewPage';
+import AdminConfiguracoesPage from './admin/AdminConfiguracoesPage';
 
 function LoadingScreen() {
   return (
@@ -36,7 +43,7 @@ function PublicOnlyRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function AppRoutes() {
+function StudentRoutes() {
   return (
     <Routes>
       <Route
@@ -116,14 +123,79 @@ function AppRoutes() {
   );
 }
 
+function AdminRoutes() {
+  return (
+    <Routes>
+      <Route index element={<Navigate to="/admin/trilhas" replace />} />
+      <Route
+        path="trilhas"
+        element={
+          <AdminGuard>
+            <AdminTrilhasPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="trilhas/:id"
+        element={
+          <AdminGuard>
+            <AdminTrilhaDetailPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="modulos/:moduloId"
+        element={
+          <AdminGuard>
+            <AdminModuloPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="questoes"
+        element={
+          <AdminGuard>
+            <AdminQuestoesBancoPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="questoes/:id"
+        element={
+          <AdminGuard>
+            <AdminQuestaoReviewPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="configuracoes"
+        element={
+          <AdminGuard>
+            <AdminConfiguracoesPage />
+          </AdminGuard>
+        }
+      />
+      <Route path="*" element={<Navigate to="/admin/trilhas" replace />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
-      <AppStateProvider>
-        <PhoneShell>
-          <AppRoutes />
-        </PhoneShell>
-      </AppStateProvider>
+      <Routes>
+        <Route path="/admin/*" element={<AdminRoutes />} />
+        <Route
+          path="/*"
+          element={
+            <AppStateProvider>
+              <PhoneShell>
+                <StudentRoutes />
+              </PhoneShell>
+            </AppStateProvider>
+          }
+        />
+      </Routes>
     </AuthProvider>
   );
 }

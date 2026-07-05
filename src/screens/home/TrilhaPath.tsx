@@ -25,7 +25,7 @@ export default function TrilhaPath() {
   if (!modules.length) {
     return (
       <div className="mt-10 text-center font-sans text-[13px] font-semibold text-text3">
-        Nenhuma disciplina cadastrada nesta trilha ainda.
+        Nenhum módulo cadastrado nesta trilha ainda.
       </div>
     );
   }
@@ -38,7 +38,7 @@ export default function TrilhaPath() {
         </div>
       </div>
       {modules.map((m, i) => (
-        <ModuleNode key={m.disciplina} m={m} index={i} onStart={startModule} />
+        <ModuleNode key={m.id} m={m} index={i} onStart={startModule} />
       ))}
     </div>
   );
@@ -99,7 +99,7 @@ function ModuleNode({ m, index, onStart }: { m: Modulo; index: number; onStart: 
           {glyph}
         </div>
         <div className="mt-2.5 max-w-[104px] text-center font-sans text-[12px] font-extrabold leading-[1.2]" style={{ color: titleColor }}>
-          {m.disciplina}
+          {m.titulo}
         </div>
       </div>
     </div>
