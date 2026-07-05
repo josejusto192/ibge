@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { Alternativa, ModuloQuestaoRow } from './database.types';
 import type { Questao } from '../data/types';
+import type { AiMessage } from '../state/types';
 
 export interface TrilhaRow {
   id: number;
@@ -87,6 +88,29 @@ export async function fetchQuestoesDoModulo(moduloId: number): Promise<Questao[]
   const { data, error } = await supabase.rpc('get_modulo_questoes', { p_modulo_id: moduloId });
   if (error) throw error;
   return (data ?? []).map(mapQuestaoRow);
+}
+
+// Tutor de IA: manda a questão atual (via edge function, que busca o
+// conteúdo com service_role) + gabarito + se o aluno acertou como contexto.
+export async function askTutorIA(input: {
+  questaoId: string;
+  duvida: string;
+  historico: AiMessage[];
+  alternativaSelecionada: string | null;
+  acertou: boolean;
+}): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('tutor-ia', {
+    body: {
+      questao_id: input.questaoId,
+      duvida: input.duvida,
+      historico: input.historico,
+      alternativa_selecionada: input.alternativaSelecionada,
+      acertou: input.acertou,
+    },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data.reply as string;
 }
 
 export async function recordResposta(usuarioId: string, questaoId: string, acertou: boolean) {

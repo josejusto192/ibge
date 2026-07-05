@@ -275,6 +275,7 @@ export type Database = {
           modelo: string;
           api_key: string | null;
           prompt_extra: string | null;
+          tutor_prompt_extra: string | null;
           atualizado_em: string;
         };
         Insert: {
@@ -282,12 +283,14 @@ export type Database = {
           modelo?: string;
           api_key?: string | null;
           prompt_extra?: string | null;
+          tutor_prompt_extra?: string | null;
           atualizado_em?: string;
         };
         Update: {
           modelo?: string;
           api_key?: string | null;
           prompt_extra?: string | null;
+          tutor_prompt_extra?: string | null;
           atualizado_em?: string;
         };
         Relationships: [];

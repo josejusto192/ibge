@@ -1,50 +1,32 @@
-/* ============================================================
- * AI TUTOR CHAT — CURRENTLY MOCKED
- * ============================================================
- * Trigger: the "Perguntar para a IA" button on the question screen,
- * visible only after a wrong answer. Opens this bottom-sheet chat.
- *
- * PRODUCTION TODO:
- * 1. Replace mockAIReply()/handleSend() below with a real call to an
- *    AI backend endpoint, e.g. POST /api/ai-tutor with body:
- *      { question: q.enunciado, alternatives: q.alternativas,
- *        correctAnswer: q.gabarito_letra, comentario: q.comentario,
- *        userDoubt: text, conversationHistory: aiMessages }
- * 2. That endpoint should call the Claude API server-side with the
- *    question context + user doubt, and return the assistant reply.
- *    Never call the AI API directly from the client with a secret key
- *    — always proxy through a backend.
- * 3. Keep the `aiTyping` flag wired to the real request's pending
- *    state (the "..." loading dots below already work off it).
- * 4. Consider persisting chat history per question/user, and basic
- *    rate limiting per session.
- * ============================================================ */
 import { PaperPlaneRight, X } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { useAppState } from '../../state/AppStateContext';
+import { askTutorIA } from '../../lib/queries';
 import type { Questao } from '../../data/types';
 
-function mockAIReply(q: Questao, _doubt: string): string {
-  return (
-    'Boa pergunta! Reforçando o comentário da questão: ' +
-    q.comentario +
-    ' Se quiser, posso explicar de outro jeito — é só perguntar de novo.'
-  );
+interface AiTutorSheetProps {
+  q: Questao;
+  selected: string | null;
+  acertou: boolean;
+  onClose: () => void;
 }
 
-export default function AiTutorSheet({ q, onClose }: { q: Questao; onClose: () => void }) {
+export default function AiTutorSheet({ q, selected, acertou, onClose }: AiTutorSheetProps) {
   const { state, dispatch } = useAppState();
   const [input, setInput] = useState('');
 
-  function send() {
+  async function send() {
     const text = input.trim();
     if (!text) return;
+    const historico = state.aiMessages;
     dispatch({ type: 'AI_SEND_USER', text });
     setInput('');
-    // MOCKED — replace this timeout with the real API round trip (see PRODUCTION TODO above).
-    setTimeout(() => {
-      dispatch({ type: 'AI_REPLY', text: mockAIReply(q, text) });
-    }, 900);
+    try {
+      const reply = await askTutorIA({ questaoId: q.id, duvida: text, historico, alternativaSelecionada: selected, acertou });
+      dispatch({ type: 'AI_REPLY', text: reply });
+    } catch (err) {
+      dispatch({ type: 'AI_REPLY', text: err instanceof Error ? err.message : 'Não consegui responder agora. Tenta de novo em instantes.' });
+    }
   }
 
   return (

@@ -35,7 +35,8 @@ export default function AdminConfiguracoesPage() {
     <AdminLayout>
       <h1 className="text-xl font-extrabold text-gray-900">Configurações de IA</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Usado pelo botão "Revisar com IA" (Google Gemini) para reescrever comentários de questões antes de liberá-las para os alunos.
+        Modelo e chave do Google Gemini, usados tanto pelo "Revisar com IA" (reescreve comentários de questões) quanto pelo Tutor de
+        IA que o aluno usa na tela de questão.
       </p>
 
       <div className="mt-6 max-w-lg rounded-xl border border-gray-200 bg-white p-5">
@@ -71,7 +72,7 @@ export default function AdminConfiguracoesPage() {
         </div>
 
         <div className="mt-4">
-          <label className="text-xs font-bold text-gray-500">DIRETRIZES EXTRAS PARA A IA (OPCIONAL)</label>
+          <label className="text-xs font-bold text-gray-500">DIRETRIZES EXTRAS PARA O "REVISAR COM IA" (OPCIONAL)</label>
           <textarea
             value={config.prompt_extra ?? ''}
             onChange={(e) => setConfig({ ...config, prompt_extra: e.target.value })}
@@ -79,6 +80,21 @@ export default function AdminConfiguracoesPage() {
             placeholder="Ex.: prefira frases curtas; sempre cite a lei/manual quando possível; evite jargão jurídico."
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
           />
+        </div>
+
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <label className="text-xs font-bold text-gray-500">DIRETRIZES EXTRAS PARA O TUTOR DE IA DO ALUNO (OPCIONAL)</label>
+          <textarea
+            value={config.tutor_prompt_extra ?? ''}
+            onChange={(e) => setConfig({ ...config, tutor_prompt_extra: e.target.value })}
+            rows={4}
+            placeholder="Ex.: chame o aluno de 'concurseiro'; incentive antes de explicar; nunca dê a resposta de outra questão."
+            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <div className="mt-1 text-xs text-gray-400">
+            Some ao enunciado, alternativas, gabarito e comentário da questão atual — o aluno só vê essa parte se pedir ajuda depois
+            de responder.
+          </div>
         </div>
 
         {error && <div className="mt-3 text-sm font-semibold text-red-600">{error}</div>}

@@ -321,7 +321,7 @@ export default function Question() {
         </div>
       )}
 
-      {aiOpen && <AiTutorSheet q={q} onClose={() => setAiOpen(false)} />}
+      {aiOpen && <AiTutorSheet q={q} selected={selected} acertou={isCorrect} onClose={() => setAiOpen(false)} />}
     </>
   );
 }

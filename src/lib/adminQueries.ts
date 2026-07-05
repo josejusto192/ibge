@@ -180,10 +180,15 @@ export interface ConfiguracoesIA {
   modelo: string;
   api_key: string | null;
   prompt_extra: string | null;
+  tutor_prompt_extra: string | null;
 }
 
 export async function fetchConfiguracoesIA(): Promise<ConfiguracoesIA> {
-  const { data, error } = await supabase.from('configuracoes_ia').select('modelo, api_key, prompt_extra').eq('id', 1).single();
+  const { data, error } = await supabase
+    .from('configuracoes_ia')
+    .select('modelo, api_key, prompt_extra, tutor_prompt_extra')
+    .eq('id', 1)
+    .single();
   if (error) throw error;
   return data;
 }
