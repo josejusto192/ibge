@@ -176,24 +176,32 @@ export async function updateUsuarioAdmin(id: string, patch: Partial<Pick<Usuario
 
 export const GEMINI_MODELOS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
 
+// A api_key nunca é lida de volta pro navegador (nem pelo admin) — só a
+// Edge Function, com service_role, a lê de fato. A tela de configurações só
+// sabe se JÁ existe uma chave configurada (api_key_configurada).
 export interface ConfiguracoesIA {
   modelo: string;
-  api_key: string | null;
   prompt_extra: string | null;
   tutor_prompt_extra: string | null;
+  api_key_configurada: boolean;
+  atualizado_em: string;
+}
+
+export interface ConfiguracoesIAPatch {
+  modelo?: string;
+  api_key?: string;
+  prompt_extra?: string | null;
+  tutor_prompt_extra?: string | null;
 }
 
 export async function fetchConfiguracoesIA(): Promise<ConfiguracoesIA> {
-  const { data, error } = await supabase
-    .from('configuracoes_ia')
-    .select('modelo, api_key, prompt_extra, tutor_prompt_extra')
-    .eq('id', 1)
-    .single();
+  const { data, error } = await supabase.rpc('admin_get_configuracoes_ia').maybeSingle();
   if (error) throw error;
+  if (!data) throw new Error('Configurações de IA não encontradas.');
   return data;
 }
 
-export async function updateConfiguracoesIA(patch: Partial<ConfiguracoesIA>) {
+export async function updateConfiguracoesIA(patch: ConfiguracoesIAPatch) {
   const { error } = await supabase
     .from('configuracoes_ia')
     .update({ ...patch, atualizado_em: new Date().toISOString() })

@@ -4,22 +4,38 @@ import AdminLayout from './AdminLayout';
 
 export default function AdminConfiguracoesPage() {
   const [config, setConfig] = useState<ConfiguracoesIA | null>(null);
+  const [novaApiKey, setNovaApiKey] = useState('');
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  function refresh() {
+    return fetchConfiguracoesIA().then(setConfig);
+  }
+
   useEffect(() => {
-    fetchConfiguracoesIA().then(setConfig);
+    refresh();
   }, []);
 
   async function handleSave() {
     if (!config) return;
+    setSaving(true);
     setError(null);
     try {
-      await updateConfiguracoesIA(config);
+      await updateConfiguracoesIA({
+        modelo: config.modelo,
+        prompt_extra: config.prompt_extra,
+        tutor_prompt_extra: config.tutor_prompt_extra,
+        ...(novaApiKey.trim() ? { api_key: novaApiKey.trim() } : {}),
+      });
+      setNovaApiKey('');
+      await refresh();
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar.');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -55,19 +71,27 @@ export default function AdminConfiguracoesPage() {
 
         <div className="mt-4">
           <label className="text-xs font-bold text-gray-500">CHAVE DE API DO GEMINI</label>
+          <div className="mt-1 flex items-center gap-2">
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${config.api_key_configurada ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}
+            >
+              {config.api_key_configurada ? 'Chave configurada' : 'Nenhuma chave configurada'}
+            </span>
+          </div>
           <input
             type="password"
-            value={config.api_key ?? ''}
-            onChange={(e) => setConfig({ ...config, api_key: e.target.value })}
-            placeholder="AIza..."
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm"
+            value={novaApiKey}
+            onChange={(e) => setNovaApiKey(e.target.value)}
+            placeholder={config.api_key_configurada ? 'Deixe em branco pra manter a chave atual, ou cole uma nova' : 'AIza...'}
+            className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm"
+            autoComplete="off"
           />
           <div className="mt-1 text-xs text-gray-400">
             Gerada em{' '}
             <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="underline">
               aistudio.google.com/apikey
             </a>
-            . Fica só no banco (nunca é enviada ao navegador do aluno) — só a Edge Function de revisão a lê.
+            . Depois de salva, a chave nunca é lida de volta pro navegador — nem pelo admin — só as Edge Functions a leem.
           </div>
         </div>
 
@@ -100,8 +124,12 @@ export default function AdminConfiguracoesPage() {
         {error && <div className="mt-3 text-sm font-semibold text-red-600">{error}</div>}
         {saved && <div className="mt-3 text-sm font-semibold text-green-600">Salvo ✓</div>}
 
-        <button onClick={handleSave} className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">
-          Salvar configurações
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {saving ? 'Salvando…' : 'Salvar configurações'}
         </button>
       </div>
     </AdminLayout>

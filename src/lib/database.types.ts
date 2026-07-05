@@ -318,6 +318,16 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      admin_get_configuracoes_ia: {
+        Args: Record<string, never>;
+        Returns: {
+          modelo: string;
+          prompt_extra: string | null;
+          tutor_prompt_extra: string | null;
+          api_key_configurada: boolean;
+          atualizado_em: string;
+        }[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
