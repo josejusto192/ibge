@@ -115,6 +115,16 @@ export default function AdminTrilhaDetailPage() {
           </div>
         </div>
         <div className="mt-3">
+          <label className="text-xs font-bold text-gray-500">NOME DA SEÇÃO (opcional)</label>
+          <input
+            value={trilha.secao_nome ?? ''}
+            onChange={(e) => setTrilha({ ...trilha, secao_nome: e.target.value })}
+            onBlur={(e) => saveField({ secao_nome: e.target.value.trim() || null })}
+            placeholder="Se deixar em branco, aparece “SEÇÃO 1”"
+            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div className="mt-3">
           <label className="text-xs font-bold text-gray-500">DESCRIÇÃO</label>
           <textarea
             value={trilha.descricao ?? ''}

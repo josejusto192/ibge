@@ -9,6 +9,7 @@ export interface TrilhaRow {
   descricao: string | null;
   ativa: boolean;
   ordem: number;
+  secao_nome: string | null;
 }
 
 export async function fetchTrilhas(): Promise<TrilhaRow[]> {

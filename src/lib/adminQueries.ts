@@ -11,7 +11,10 @@ export async function createTrilha(input: { nome: string; slug: string; descrica
   return data as TrilhaRow;
 }
 
-export async function updateTrilha(id: number, patch: Partial<{ nome: string; slug: string; descricao: string | null; ativa: boolean; ordem: number }>) {
+export async function updateTrilha(
+  id: number,
+  patch: Partial<{ nome: string; slug: string; descricao: string | null; ativa: boolean; ordem: number; secao_nome: string | null }>
+) {
   const { error } = await supabase.from('trilhas').update(patch).eq('id', id);
   if (error) throw error;
 }

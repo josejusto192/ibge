@@ -224,6 +224,7 @@ export type Database = {
           descricao: string | null;
           ativa: boolean;
           ordem: number;
+          secao_nome: string | null;
         };
         Insert: {
           nome: string;
@@ -231,6 +232,7 @@ export type Database = {
           descricao?: string | null;
           ativa?: boolean;
           ordem?: number;
+          secao_nome?: string | null;
         };
         Update: {
           nome?: string;
@@ -238,6 +240,7 @@ export type Database = {
           descricao?: string | null;
           ativa?: boolean;
           ordem?: number;
+          secao_nome?: string | null;
         };
         Relationships: [];
       };

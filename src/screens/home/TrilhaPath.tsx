@@ -14,10 +14,11 @@ function offsetX(i: number) {
 }
 
 export default function TrilhaPath() {
-  const { modules, loading } = useAppData();
+  const { modules, loading, activeTrilha } = useAppData();
   const { dispatch } = useAppState();
   const navigate = useNavigate();
   const [aula, setAula] = useState<Modulo | null>(null);
+  const secaoNome = activeTrilha?.secao_nome?.trim() || 'SEÇÃO 1';
 
   function startModule() {
     dispatch({ type: 'RESET_SESSION' });
@@ -38,7 +39,7 @@ export default function TrilhaPath() {
     <div>
       <div className="mb-2 text-center">
         <div className="inline-block rounded-[20px] border border-border2 bg-surface px-3.5 py-1.5 font-sans text-[11px] font-bold tracking-[1px] text-text3">
-          SEÇÃO 1
+          {secaoNome}
         </div>
       </div>
       {modules.map((m, i) => (
