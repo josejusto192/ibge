@@ -26,6 +26,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <NavLink to="/admin/questoes" className={NAV_LINK_CLASS}>
               Banco de questões
             </NavLink>
+            <NavLink to="/admin/usuarios" className={NAV_LINK_CLASS}>
+              Usuários
+            </NavLink>
             <NavLink to="/admin/configuracoes" className={NAV_LINK_CLASS}>
               Configurações
             </NavLink>

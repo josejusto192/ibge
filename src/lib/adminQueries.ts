@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { QuestaoRow } from './database.types';
 import type { ModuloRow, TrilhaRow } from './queries';
+import type { Usuario } from '../hooks/useUsuario';
 
 // ---- Trilhas ----
 
@@ -140,6 +141,25 @@ export async function saveManualReview(questaoId: string, usuarioId: string, com
 
 export async function unmarkRevisado(questaoId: string) {
   const { error } = await supabase.from('questoes').update({ revisado: false }).eq('id', questaoId);
+  if (error) throw error;
+}
+
+// ---- Usuários ----
+
+const USUARIOS_PAGE_SIZE = 20;
+
+export async function searchUsuarios(texto: string | undefined, page: number): Promise<{ rows: Usuario[]; total: number }> {
+  let query = supabase.from('usuarios').select('*', { count: 'exact' }).order('created_at', { ascending: false });
+
+  if (texto) query = query.or(`nome.ilike.%${texto}%,email.ilike.%${texto}%`);
+
+  const { data, error, count } = await query.range(page * USUARIOS_PAGE_SIZE, page * USUARIOS_PAGE_SIZE + USUARIOS_PAGE_SIZE - 1);
+  if (error) throw error;
+  return { rows: data ?? [], total: count ?? 0 };
+}
+
+export async function updateUsuarioAdmin(id: string, patch: Partial<Pick<Usuario, 'assinatura_ativa' | 'is_admin'>>) {
+  const { error } = await supabase.from('usuarios').update(patch).eq('id', id);
   if (error) throw error;
 }
 

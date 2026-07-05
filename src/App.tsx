@@ -19,6 +19,7 @@ import AdminTrilhaDetailPage from './admin/AdminTrilhaDetailPage';
 import AdminModuloPage from './admin/AdminModuloPage';
 import AdminQuestoesBancoPage from './admin/AdminQuestoesBancoPage';
 import AdminQuestaoReviewPage from './admin/AdminQuestaoReviewPage';
+import AdminUsuariosPage from './admin/AdminUsuariosPage';
 import AdminConfiguracoesPage from './admin/AdminConfiguracoesPage';
 
 function LoadingScreen() {
@@ -164,6 +165,14 @@ function AdminRoutes() {
         element={
           <AdminGuard>
             <AdminQuestaoReviewPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="usuarios"
+        element={
+          <AdminGuard>
+            <AdminUsuariosPage />
           </AdminGuard>
         }
       />

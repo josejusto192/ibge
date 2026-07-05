@@ -123,6 +123,7 @@ export type Database = {
           meta_diaria?: number;
           xp?: number;
           trilha_ativa_id?: number | null;
+          is_admin?: boolean;
         };
         Relationships: [];
       };
