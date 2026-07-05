@@ -11,7 +11,9 @@ export default function AdminTrilhaDetailPage() {
 
   const [trilha, setTrilha] = useState<TrilhaRow | null>(null);
   const [modulos, setModulos] = useState<ModuloRow[] | null>(null);
+  const [novoTipo, setNovoTipo] = useState<'questoes' | 'aula'>('questoes');
   const [novoModulo, setNovoModulo] = useState('');
+  const [novoVideoUrl, setNovoVideoUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   function refresh() {
@@ -30,13 +32,29 @@ export default function AdminTrilhaDetailPage() {
 
   async function addModulo() {
     if (!novoModulo.trim()) return;
+    if (novoTipo === 'aula' && !novoVideoUrl.trim()) {
+      setError('Informe a URL do vídeo do YouTube.');
+      return;
+    }
+    setError(null);
     try {
-      await createModulo(trilhaId, novoModulo.trim(), modulos?.length ?? 0);
+      await createModulo(trilhaId, {
+        titulo: novoModulo.trim(),
+        ordem: modulos?.length ?? 0,
+        tipo: novoTipo,
+        video_url: novoTipo === 'aula' ? novoVideoUrl.trim() : null,
+      });
       setNovoModulo('');
+      setNovoVideoUrl('');
       refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar módulo.');
     }
+  }
+
+  async function saveVideoUrl(m: ModuloRow, videoUrl: string) {
+    await updateModulo(m.id, { video_url: videoUrl.trim() || null });
+    refresh();
   }
 
   async function move(m: ModuloRow, dir: -1 | 1) {
@@ -121,19 +139,39 @@ export default function AdminTrilhaDetailPage() {
         <h2 className="text-lg font-extrabold text-gray-900">Módulos</h2>
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-3 flex flex-wrap gap-2">
+        <select
+          value={novoTipo}
+          onChange={(e) => setNovoTipo(e.target.value as 'questoes' | 'aula')}
+          className="rounded-lg border border-gray-300 px-2 py-2 text-sm"
+        >
+          <option value="questoes">Módulo de questões</option>
+          <option value="aula">Aula (vídeo opcional)</option>
+        </select>
         <input
           value={novoModulo}
           onChange={(e) => setNovoModulo(e.target.value)}
-          placeholder="Título do novo módulo"
+          placeholder={novoTipo === 'aula' ? 'Título da aula' : 'Título do novo módulo'}
           onKeyDown={(e) => e.key === 'Enter' && addModulo()}
           className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
         />
+        {novoTipo === 'aula' && (
+          <input
+            value={novoVideoUrl}
+            onChange={(e) => setNovoVideoUrl(e.target.value)}
+            placeholder="URL do vídeo do YouTube"
+            onKeyDown={(e) => e.key === 'Enter' && addModulo()}
+            className="w-64 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+        )}
         <button onClick={addModulo} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">
-          Adicionar módulo
+          Adicionar
         </button>
       </div>
       {error && <div className="mt-2 text-sm font-semibold text-red-600">{error}</div>}
+      <p className="mt-2 text-xs text-gray-400">
+        Aulas são sempre opcionais: aparecem no caminho da trilha, mas não bloqueiam nem exigem conclusão para o aluno avançar.
+      </p>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
         {(modulos ?? []).map((m, i) => (
@@ -150,10 +188,27 @@ export default function AdminTrilhaDetailPage() {
                 ▼
               </button>
             </div>
-            <div className="flex-1 font-semibold text-gray-900">{m.titulo}</div>
-            <Link to={`/admin/modulos/${m.id}`} className="font-bold text-blue-600 hover:underline">
-              Editar questões ›
-            </Link>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-900">{m.titulo}</span>
+                {m.tipo === 'aula' && (
+                  <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-700">Aula · opcional</span>
+                )}
+              </div>
+              {m.tipo === 'aula' && (
+                <input
+                  defaultValue={m.video_url ?? ''}
+                  onBlur={(e) => saveVideoUrl(m, e.target.value)}
+                  placeholder="URL do vídeo do YouTube"
+                  className="mt-1 w-full max-w-md rounded-lg border border-gray-300 px-2 py-1 text-xs"
+                />
+              )}
+            </div>
+            {m.tipo === 'questoes' && (
+              <Link to={`/admin/modulos/${m.id}`} className="font-bold text-blue-600 hover:underline">
+                Editar questões ›
+              </Link>
+            )}
             <button onClick={() => removeModulo(m)} className="text-sm font-bold text-red-600 hover:underline">
               Excluir
             </button>

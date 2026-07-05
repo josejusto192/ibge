@@ -161,15 +161,21 @@ export type Database = {
           trilha_id: number;
           titulo: string;
           ordem: number;
+          tipo: 'questoes' | 'aula';
+          video_url: string | null;
         };
         Insert: {
           trilha_id: number;
           titulo: string;
           ordem?: number;
+          tipo?: 'questoes' | 'aula';
+          video_url?: string | null;
         };
         Update: {
           titulo?: string;
           ordem?: number;
+          tipo?: 'questoes' | 'aula';
+          video_url?: string | null;
         };
         Relationships: [];
       };

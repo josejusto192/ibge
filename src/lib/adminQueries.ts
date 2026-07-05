@@ -23,13 +23,19 @@ export async function deleteTrilha(id: number) {
 
 // ---- Módulos ----
 
-export async function createModulo(trilhaId: number, titulo: string, ordem: number) {
-  const { data, error } = await supabase.from('modulos').insert({ trilha_id: trilhaId, titulo, ordem }).select().single();
+export async function createModulo(
+  trilhaId: number,
+  input: { titulo: string; ordem: number; tipo?: 'questoes' | 'aula'; video_url?: string | null }
+) {
+  const { data, error } = await supabase.from('modulos').insert({ trilha_id: trilhaId, ...input }).select().single();
   if (error) throw error;
   return data as ModuloRow;
 }
 
-export async function updateModulo(id: number, patch: Partial<{ titulo: string; ordem: number }>) {
+export async function updateModulo(
+  id: number,
+  patch: Partial<{ titulo: string; ordem: number; tipo: 'questoes' | 'aula'; video_url: string | null }>
+) {
   const { error } = await supabase.from('modulos').update(patch).eq('id', id);
   if (error) throw error;
 }

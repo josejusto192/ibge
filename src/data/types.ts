@@ -31,15 +31,21 @@ export interface Questao {
   alternativas: Alternativa[];
 }
 
-export type ModuloStatus = 'locked' | 'current' | 'done';
+export type ModuloStatus = 'locked' | 'current' | 'done' | 'aula';
+
+export type ModuloTipo = 'questoes' | 'aula';
 
 // Um "módulo" é um nó do caminho da trilha, curado pelo admin: título livre
 // e uma lista de questões escolhidas a dedo (modulo_questoes), não mais uma
 // disciplina inteira. status/acertos/total vêm de progresso_modulos.
+// Quando tipo === 'aula', o nó é só um vídeo opcional (video_url): não entra
+// na sequência obrigatória de questões, status é sempre 'aula'.
 export interface Modulo {
   id: number;
   titulo: string;
   ordem: number;
+  tipo: ModuloTipo;
+  video_url: string | null;
   status: ModuloStatus;
   acertos: number;
   total: number;

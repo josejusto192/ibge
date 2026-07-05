@@ -22,6 +22,8 @@ export interface ModuloRow {
   trilha_id: number;
   titulo: string;
   ordem: number;
+  tipo: 'questoes' | 'aula';
+  video_url: string | null;
 }
 
 export async function fetchModulos(trilhaId: number): Promise<ModuloRow[]> {

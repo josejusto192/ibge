@@ -9,6 +9,11 @@ type UsuarioUpdate = Database['public']['Tables']['usuarios']['Update'];
 function computeModules(modulos: ModuloRow[], progresso: Map<number, { acertos: number; total: number }>): Modulo[] {
   let foundCurrent = false;
   return modulos.map((m) => {
+    if (m.tipo === 'aula') {
+      // Aula é sempre opcional: não entra na sequência obrigatória de questões
+      // (não bloqueia nem é bloqueada pelo restante da trilha).
+      return { id: m.id, titulo: m.titulo, ordem: m.ordem, tipo: m.tipo, video_url: m.video_url, status: 'aula' as ModuloStatus, acertos: 0, total: 0 };
+    }
     const prog = progresso.get(m.id);
     let status: ModuloStatus;
     if (prog) status = 'done';
@@ -18,7 +23,16 @@ function computeModules(modulos: ModuloRow[], progresso: Map<number, { acertos: 
     } else {
       status = 'locked';
     }
-    return { id: m.id, titulo: m.titulo, ordem: m.ordem, status, acertos: prog?.acertos ?? 0, total: prog?.total ?? 0 };
+    return {
+      id: m.id,
+      titulo: m.titulo,
+      ordem: m.ordem,
+      tipo: m.tipo,
+      video_url: m.video_url,
+      status,
+      acertos: prog?.acertos ?? 0,
+      total: prog?.total ?? 0,
+    };
   });
 }
 

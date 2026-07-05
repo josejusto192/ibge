@@ -1,7 +1,10 @@
+import { Play } from '@phosphor-icons/react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../../contexts/AppDataContext';
 import { useAppState } from '../../state/AppStateContext';
 import type { Modulo } from '../../data/types';
+import VideoSheet from '../../components/sheets/VideoSheet';
 
 const AMP = 34;
 const CELL_H = 116;
@@ -14,6 +17,7 @@ export default function TrilhaPath() {
   const { modules, loading } = useAppData();
   const { dispatch } = useAppState();
   const navigate = useNavigate();
+  const [aula, setAula] = useState<Modulo | null>(null);
 
   function startModule() {
     dispatch({ type: 'RESET_SESSION' });
@@ -38,40 +42,48 @@ export default function TrilhaPath() {
         </div>
       </div>
       {modules.map((m, i) => (
-        <ModuleNode key={m.id} m={m} index={i} onStart={startModule} />
+        <ModuleNode key={m.id} m={m} index={i} onStart={startModule} onOpenAula={setAula} />
       ))}
+      {aula?.video_url && <VideoSheet titulo={aula.titulo} videoUrl={aula.video_url} onClose={() => setAula(null)} />}
     </div>
   );
 }
 
-function ModuleNode({ m, index, onStart }: { m: Modulo; index: number; onStart: () => void }) {
+function ModuleNode({ m, index, onStart, onOpenAula }: { m: Modulo; index: number; onStart: () => void; onOpenAula: (m: Modulo) => void }) {
   const isCurrent = m.status === 'current';
   const isDone = m.status === 'done';
+  const isAula = m.tipo === 'aula';
 
   let bg: string;
   let glyphColor: string;
-  let glyph: string;
   let shadow: string;
 
-  if (isDone) {
+  if (isAula) {
+    bg = '#F3E8FF';
+    glyphColor = '#7C3AED';
+    shadow = '0 5px 0 #DCC7FA';
+  } else if (isDone) {
     bg = '#1557E6';
     glyphColor = '#fff';
-    glyph = '✓';
     shadow = '0 6px 0 #0E3DAE';
   } else if (isCurrent) {
     bg = '#FFCB2D';
     glyphColor = '#0B1F4D';
-    glyph = '▶';
     shadow = '0 6px 0 #E0A800';
   } else {
     bg = '#E6EAF5';
     glyphColor = '#AEB6CC';
-    glyph = String(index + 1);
     shadow = '0 5px 0 #D3D9EA';
   }
 
   const size = 66;
-  const titleColor = isCurrent ? '#1557E6' : isDone ? '#3a4257' : '#9aa4bd';
+  const titleColor = isAula ? '#7C3AED' : isCurrent ? '#1557E6' : isDone ? '#3a4257' : '#9aa4bd';
+  const clickable = isCurrent || isAula;
+
+  function handleClick() {
+    if (isAula) onOpenAula(m);
+    else if (isCurrent) onStart();
+  }
 
   return (
     <div
@@ -92,15 +104,16 @@ function ModuleNode({ m, index, onStart }: { m: Modulo; index: number; onStart: 
           </div>
         )}
         <div
-          onClick={isCurrent ? onStart : undefined}
-          className={`relative z-[1] flex items-center justify-center rounded-full border-4 border-white font-display font-extrabold ${isCurrent ? 'animate-pulse-node cursor-pointer' : ''}`}
+          onClick={clickable ? handleClick : undefined}
+          className={`relative z-[1] flex items-center justify-center rounded-full border-4 border-white font-display font-extrabold ${isCurrent ? 'animate-pulse-node cursor-pointer' : isAula ? 'cursor-pointer' : ''}`}
           style={{ width: `${size}px`, height: `${size}px`, background: bg, color: glyphColor, fontSize: '22px', boxShadow: shadow }}
         >
-          {glyph}
+          {isAula ? <Play weight="fill" size={24} /> : isDone ? '✓' : isCurrent ? '▶' : String(index + 1)}
         </div>
         <div className="mt-2.5 max-w-[104px] text-center font-sans text-[12px] font-extrabold leading-[1.2]" style={{ color: titleColor }}>
           {m.titulo}
         </div>
+        {isAula && <div className="mt-0.5 font-sans text-[10px] font-bold tracking-[0.4px] text-[#B08BE8]">EXTRA · OPCIONAL</div>}
       </div>
     </div>
   );
