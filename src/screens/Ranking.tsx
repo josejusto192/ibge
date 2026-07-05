@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAppData } from '../contexts/AppDataContext';
 import { fetchRanking, type RankingRow } from '../lib/queries';
 import { daysLeftInMonth } from '../lib/format';
+import PatternBackground from '../components/PatternBackground';
 
 const POS_COLORS: Record<number, string> = { 1: '#F5B301', 2: '#9aa4bd', 3: '#cd7f32' };
 const PRIZES: Record<number, string> = { 1: 'Mentoria grátis', 2: '50% off', 3: '25% off' };
@@ -32,10 +33,7 @@ export default function Ranking() {
         <div className="font-display text-[20px] font-extrabold text-ink">Ranking mensal</div>
         <div className="mt-0.5 font-sans text-[12px] font-semibold text-text2">Liga Ouro · termina em {daysLeftInMonth()} dias</div>
       </div>
-      <div
-        className="scr flex-1 overflow-y-auto p-[18px_18px_30px]"
-        style={{ backgroundImage: "url('/assets/trilha-pattern.png')", backgroundSize: 'cover', backgroundPosition: 'top center', backgroundRepeat: 'no-repeat' }}
-      >
+      <PatternBackground scrollClassName="p-[18px_18px_30px]">
         <div className="mb-4 flex gap-2">
           <div className="flex-1 rounded-2xl p-3 text-center" style={{ background: 'linear-gradient(135deg,#FFCB2D,#F5B301)', boxShadow: '0 10px 22px -14px rgba(245,179,1,.8)' }}>
             <div className="font-sans text-[18px] font-extrabold text-ink">🥇</div>
@@ -91,7 +89,7 @@ export default function Ranking() {
             );
           })}
         </div>
-      </div>
+      </PatternBackground>
     </>
   );
 }

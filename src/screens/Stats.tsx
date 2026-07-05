@@ -3,6 +3,7 @@ import { useAppData } from '../contexts/AppDataContext';
 import { fetchStats, type StatsData } from '../lib/queries';
 import { levelFromXp } from '../lib/format';
 import { useAppState } from '../state/AppStateContext';
+import PatternBackground from '../components/PatternBackground';
 
 const WEEK_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 
@@ -37,10 +38,7 @@ export default function Stats() {
       <div className="z-[3] bg-surface p-[18px_18px_14px]" style={{ borderBottom: '1px solid #EDF0F8' }}>
         <div className="font-display text-[20px] font-extrabold text-ink">Estatísticas</div>
       </div>
-      <div
-        className="scr flex-1 overflow-y-auto p-[18px_18px_30px]"
-        style={{ backgroundImage: "url('/assets/trilha-pattern.png')", backgroundSize: 'cover', backgroundPosition: 'top center', backgroundRepeat: 'no-repeat' }}
-      >
+      <PatternBackground scrollClassName="p-[18px_18px_30px]">
         <div className="flex gap-3">
           <div className="flex-1 rounded-[20px] p-4" style={{ background: 'linear-gradient(135deg,#FFCB2D,#F5B301)', boxShadow: '0 12px 26px -16px rgba(245,179,1,.8)' }}>
             <div className="font-display text-[34px] font-extrabold text-ink">{usuario?.streak ?? 0}</div>
@@ -138,7 +136,7 @@ export default function Stats() {
             </div>
           </div>
         )}
-      </div>
+      </PatternBackground>
     </>
   );
 }

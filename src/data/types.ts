@@ -13,9 +13,11 @@ export interface Alternativa {
 export interface Questao {
   id: string;
   enunciado: string;
+  enunciado_html?: string;
   tem_imagem: boolean;
   gabarito_letra: string;
   comentario: string;
+  comentario_html?: string;
   banca: string;
   ano: number;
   orgao?: string;

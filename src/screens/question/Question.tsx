@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../../contexts/AppDataContext';
 import { fetchQuestoesPorDisciplina, recordResposta, upsertProgressoModulo } from '../../lib/queries';
 import { formatTimer } from '../../lib/format';
+import { sanitizeHtml } from '../../lib/sanitizeHtml';
 import { useAppState } from '../../state/AppStateContext';
 import type { Questao } from '../../data/types';
+import PatternBackground from '../../components/PatternBackground';
 import ReportSheet from './ReportSheet';
 import AiTutorSheet from './AiTutorSheet';
 
@@ -146,10 +148,7 @@ export default function Question() {
         </div>
       </div>
 
-      <div
-        className="scr relative flex-1 overflow-y-auto p-[18px_18px_150px]"
-        style={{ backgroundImage: "url('/assets/trilha-pattern.png')", backgroundSize: 'cover', backgroundPosition: 'top center', backgroundRepeat: 'no-repeat' }}
-      >
+      <PatternBackground scrollClassName="p-[18px_18px_150px]">
         <div className="mb-3.5 flex flex-wrap gap-1.5">
           <span className="rounded-lg bg-blue-tint px-2.5 py-1 font-sans text-[11px] font-bold text-blue">
             {q.banca} · {q.ano}
@@ -184,16 +183,14 @@ export default function Question() {
           </div>
         )}
 
-        {q.tem_imagem && (
+        {q.enunciado_html ? (
           <div
-            className="mb-3.5 flex h-[120px] items-center justify-center rounded-2xl border-[1.5px] border-dashed border-[#c2c9da]"
-            style={{ background: 'repeating-linear-gradient(45deg,#f8fafc,#f8fafc 10px,#eef1f8 10px,#eef1f8 20px)' }}
-          >
-            <span className="font-mono text-[12px] font-semibold text-text3">[ imagem da questão ]</span>
-          </div>
+            className="rich-content mb-5 font-sans text-[16px] font-semibold leading-[1.55] text-ink"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(q.enunciado_html) }}
+          />
+        ) : (
+          <div className="mb-5 whitespace-pre-line font-sans text-[16px] font-semibold leading-[1.55] text-ink">{q.enunciado}</div>
         )}
-
-        <div className="mb-5 whitespace-pre-line font-sans text-[16px] font-semibold leading-[1.55] text-ink">{q.enunciado}</div>
 
         <div className="flex flex-col gap-2.5">
           {q.alternativas.map((a) => {
@@ -260,7 +257,14 @@ export default function Question() {
             <div className="font-sans text-[15px] font-extrabold" style={{ color: isCorrect ? '#17784f' : '#c0392b' }}>
               {isCorrect ? 'Você acertou! 🎉' : `Ops! Resposta correta: ${q.gabarito_letra}`}
             </div>
-            <div className="mt-2 font-sans text-[13.5px] font-medium leading-[1.6] text-ink-soft">{q.comentario}</div>
+            {q.comentario_html ? (
+              <div
+                className="rich-content mt-2 font-sans text-[13.5px] font-medium leading-[1.6] text-ink-soft"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(q.comentario_html) }}
+              />
+            ) : (
+              <div className="mt-2 font-sans text-[13.5px] font-medium leading-[1.6] text-ink-soft">{q.comentario}</div>
+            )}
 
             {showAskAi && (
               <button
@@ -287,7 +291,7 @@ export default function Question() {
             Reportar ou comentar questão
           </button>
         </div>
-      </div>
+      </PatternBackground>
 
       <div className="absolute inset-x-0 bottom-0 p-[16px_18px_22px]" style={{ background: 'linear-gradient(180deg,rgba(244,246,252,0),#F4F6FC 30%)' }}>
         {answered ? (

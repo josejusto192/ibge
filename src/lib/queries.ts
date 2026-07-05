@@ -64,9 +64,11 @@ const QUESTOES_POR_MODULO = 8;
 function mapQuestaoRow(row: {
   id: string;
   enunciado: string | null;
+  enunciado_html: string | null;
   tem_imagem: boolean;
   gabarito_letra: string | null;
   comentario: string | null;
+  comentario_html: string | null;
   banca: string | null;
   ano: number | null;
   orgao: string | null;
@@ -82,9 +84,11 @@ function mapQuestaoRow(row: {
   return {
     id: row.id,
     enunciado: row.enunciado ?? '',
+    enunciado_html: row.enunciado_html ?? undefined,
     tem_imagem: row.tem_imagem,
     gabarito_letra: row.gabarito_letra ?? '',
     comentario: row.comentario ?? '',
+    comentario_html: row.comentario_html ?? undefined,
     banca: row.banca ?? '',
     ano: row.ano ?? 0,
     orgao: row.orgao ?? undefined,
@@ -103,7 +107,7 @@ export async function fetchQuestoesPorDisciplina(disciplina: string, banca: stri
   let query = supabase
     .from('questoes')
     .select(
-      'id, enunciado, tem_imagem, gabarito_letra, comentario, banca, ano, orgao, orgao_nome, cargo, disciplina, nivel_escolaridade, tipo, anulada, desatualizada, alternativas'
+      'id, enunciado, enunciado_html, tem_imagem, gabarito_letra, comentario, comentario_html, banca, ano, orgao, orgao_nome, cargo, disciplina, nivel_escolaridade, tipo, anulada, desatualizada, alternativas'
     )
     .eq('disciplina', disciplina)
     .eq('anulada', false)

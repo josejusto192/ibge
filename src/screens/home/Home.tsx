@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppData } from '../../contexts/AppDataContext';
+import PatternBackground from '../../components/PatternBackground';
 import TrilhaPath from './TrilhaPath';
 import TrilhasSheet from './TrilhasSheet';
 import FiltersSheet from './FiltersSheet';
@@ -71,12 +72,9 @@ export default function Home() {
         </div>
       </div>
 
-      <div
-        className="scr flex-1 overflow-y-auto overflow-x-hidden p-[26px_18px]"
-        style={{ backgroundImage: "url('/assets/trilha-pattern.png')", backgroundSize: 'cover', backgroundPosition: 'top center', backgroundRepeat: 'no-repeat' }}
-      >
+      <PatternBackground scrollClassName="overflow-x-hidden p-[26px_18px]">
         <TrilhaPath />
-      </div>
+      </PatternBackground>
 
       {sheet === 'trilhas' && <TrilhasSheet onClose={() => setSheet('none')} />}
       {sheet === 'filters' && <FiltersSheet onClose={() => setSheet('none')} />}

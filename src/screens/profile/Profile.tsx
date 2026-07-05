@@ -5,6 +5,7 @@ import { levelFromXp } from '../../lib/format';
 import { useAppData } from '../../contexts/AppDataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchReferrals, fetchStats } from '../../lib/queries';
+import PatternBackground from '../../components/PatternBackground';
 import ReferralSheet from './ReferralSheet';
 
 export default function Profile() {
@@ -65,10 +66,7 @@ export default function Profile() {
 
   return (
     <>
-      <div
-        className="scr flex-1 overflow-y-auto p-[0_0_30px]"
-        style={{ backgroundImage: "url('/assets/trilha-pattern.png')", backgroundSize: 'cover', backgroundPosition: 'top center', backgroundRepeat: 'no-repeat' }}
-      >
+      <PatternBackground scrollClassName="p-[0_0_30px]">
         <div
           className="p-[34px_20px_26px] text-center"
           style={{ backgroundImage: "url('/assets/bg-blue-texture.png')", backgroundSize: 'cover', backgroundPosition: 'center top' }}
@@ -144,7 +142,7 @@ export default function Profile() {
             Sair da conta
           </button>
         </div>
-      </div>
+      </PatternBackground>
 
       {referralOpen && <ReferralSheet onClose={() => setReferralOpen(false)} />}
     </>

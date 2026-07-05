@@ -6,7 +6,7 @@ export default function PhoneShell({ children }: { children: ReactNode }) {
   const { state } = useAppState();
 
   return (
-    <div className="relative mx-auto flex min-h-dvh w-full max-w-[480px] flex-col overflow-hidden bg-app-bg">
+    <div className="relative mx-auto flex h-dvh w-full max-w-[480px] flex-col overflow-hidden bg-app-bg">
       {children}
 
       <MentorSheet />
