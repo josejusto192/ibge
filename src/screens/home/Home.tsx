@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useAppData } from '../../contexts/AppDataContext';
 import PatternBackground from '../../components/PatternBackground';
+import ErrosFab from '../../components/ErrosFab';
 import TrilhaPath from './TrilhaPath';
 import TrilhasSheet from './TrilhasSheet';
 
 export default function Home() {
-  const { usuario, activeTrilha, dailyDone } = useAppData();
+  const { usuario, activeTrilha, dailyDone, errosCount } = useAppData();
   const [sheet, setSheet] = useState<'none' | 'trilhas'>('none');
 
   const dailyGoal = usuario?.meta_diaria ?? 20;
@@ -62,6 +63,8 @@ export default function Home() {
       <PatternBackground scrollClassName="overflow-x-hidden p-[26px_18px]">
         <TrilhaPath />
       </PatternBackground>
+
+      <ErrosFab count={errosCount} />
 
       {sheet === 'trilhas' && <TrilhasSheet onClose={() => setSheet('none')} />}
     </>

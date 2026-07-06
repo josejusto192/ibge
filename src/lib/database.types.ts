@@ -363,6 +363,14 @@ export type Database = {
           orgaos: string[] | null;
         }[];
       };
+      contar_minhas_questoes_erradas: {
+        Args: { p_trilha_id: number };
+        Returns: number;
+      };
+      get_minhas_questoes_erradas: {
+        Args: { p_trilha_id: number };
+        Returns: ModuloQuestaoRow[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

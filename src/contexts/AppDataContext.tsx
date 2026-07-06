@@ -1,6 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useUsuario, type Usuario } from '../hooks/useUsuario';
-import { fetchDailyDone, fetchModulos, fetchProgressoModulos, fetchTrilhas, type ModuloRow, type TrilhaRow } from '../lib/queries';
+import {
+  fetchContagemErros,
+  fetchDailyDone,
+  fetchModulos,
+  fetchProgressoModulos,
+  fetchTrilhas,
+  type ModuloRow,
+  type TrilhaRow,
+} from '../lib/queries';
 import type { Database } from '../lib/database.types';
 import type { Modulo, ModuloStatus } from '../data/types';
 import { logClientError } from '../lib/errorLog';
@@ -51,6 +59,8 @@ interface AppDataContextValue {
   refreshModules: () => Promise<void>;
   dailyDone: number;
   refreshDailyDone: () => Promise<void>;
+  errosCount: number;
+  refreshErrosCount: () => Promise<void>;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -62,6 +72,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [trilhas, setTrilhas] = useState<TrilhaRow[]>([]);
   const [modules, setModules] = useState<Modulo[]>([]);
   const [dailyDone, setDailyDone] = useState(0);
+  const [errosCount, setErrosCount] = useState(0);
   const [loadingTrilhas, setLoadingTrilhas] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryTick, setRetryTick] = useState(0);
@@ -115,6 +126,19 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     refreshDailyDone();
   }, [refreshDailyDone]);
 
+  const refreshErrosCount = useCallback(async () => {
+    if (!activeTrilha) return;
+    try {
+      setErrosCount(await fetchContagemErros(activeTrilha.id));
+    } catch (err) {
+      logClientError(err, 'refreshErrosCount');
+    }
+  }, [activeTrilha]);
+
+  useEffect(() => {
+    refreshErrosCount();
+  }, [refreshErrosCount]);
+
   const setActiveTrilha = useCallback(
     async (id: number) => {
       await updateUsuario({ trilha_ativa_id: id });
@@ -140,6 +164,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         refreshModules,
         dailyDone,
         refreshDailyDone,
+        errosCount,
+        refreshErrosCount,
       }}
     >
       {children}

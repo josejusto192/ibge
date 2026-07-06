@@ -118,6 +118,29 @@ export async function recordResposta(usuarioId: string, questaoId: string, acert
   if (error) throw error;
 }
 
+// ---- Caderno de erros (por trilha, com "responder de novo") ----
+
+export async function fetchContagemErros(trilhaId: number): Promise<number> {
+  const { data, error } = await supabase.rpc('contar_minhas_questoes_erradas', { p_trilha_id: trilhaId });
+  if (error) throw error;
+  return data ?? 0;
+}
+
+export async function fetchQuestoesErradas(trilhaId: number): Promise<Questao[]> {
+  const { data, error } = await supabase.rpc('get_minhas_questoes_erradas', { p_trilha_id: trilhaId });
+  if (error) throw error;
+  return (data ?? []).map(mapQuestaoRow);
+}
+
+// "Responder de novo": atualiza a mesma linha (upsert, não insert — já existe
+// desde a primeira resposta), então se acertar desta vez ela some do caderno.
+export async function atualizarRespostaErro(usuarioId: string, questaoId: string, acertou: boolean) {
+  const { error } = await supabase
+    .from('progresso_questoes')
+    .upsert({ usuario_id: usuarioId, questao_id: questaoId, acertou, respondido_em: new Date().toISOString() }, { onConflict: 'usuario_id,questao_id' });
+  if (error) throw error;
+}
+
 export async function fetchDailyDone(usuarioId: string): Promise<number> {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
