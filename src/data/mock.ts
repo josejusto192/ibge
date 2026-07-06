@@ -39,7 +39,3 @@ export const REPORT_REASONS = [
   'Questão desatualizada',
   'Comentar / tirar dúvida',
 ];
-
-// Lista curada — poderia virar `select distinct banca from questoes`,
-// mantida estática por simplicidade/performance no MVP.
-export const FILTER_BANCAS = ['FGV', 'Cebraspe', 'FCC', 'IBFC'];

@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { QuestaoRow } from '../lib/database.types';
-import { fetchModulo, fetchModuloQuestoesAdmin, addQuestaoToModulo, removeQuestaoFromModulo, reorderModuloQuestoes, searchQuestoes, type QuestaoSearchFilters } from '../lib/adminQueries';
-import { FILTER_BANCAS } from '../data/mock';
+import {
+  fetchModulo,
+  fetchModuloQuestoesAdmin,
+  addQuestaoToModulo,
+  removeQuestaoFromModulo,
+  reorderModuloQuestoes,
+  searchQuestoes,
+  fetchFiltrosQuestoes,
+  type QuestaoSearchFilters,
+  type FiltrosQuestoes,
+} from '../lib/adminQueries';
 import AdminLayout from './AdminLayout';
+
+const FILTROS_VAZIOS: FiltrosQuestoes = { bancas: [], disciplinas: [], cargos: [], niveis: [], orgaos: [] };
 
 export default function AdminModuloPage() {
   const { moduloId } = useParams();
@@ -13,6 +24,7 @@ export default function AdminModuloPage() {
   const [trilhaId, setTrilhaId] = useState<number | null>(null);
   const [assigned, setAssigned] = useState<{ ordem: number; questao: QuestaoRow }[] | null>(null);
   const [filters, setFilters] = useState<QuestaoSearchFilters>({ apenas: 'todas' });
+  const [opcoes, setOpcoes] = useState<FiltrosQuestoes>(FILTROS_VAZIOS);
   const [results, setResults] = useState<QuestaoRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
@@ -30,6 +42,10 @@ export default function AdminModuloPage() {
     refreshAssigned();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    fetchFiltrosQuestoes().then(setOpcoes);
+  }, []);
 
   useEffect(() => {
     searchQuestoes(filters, page).then((r) => {
@@ -117,14 +133,20 @@ export default function AdminModuloPage() {
               }}
               className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
             />
-            <input
-              placeholder="Disciplina"
+            <select
               onChange={(e) => {
                 setPage(0);
                 setFilters((f) => ({ ...f, disciplina: e.target.value || undefined }));
               }}
-              className="w-32 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
-            />
+              className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
+            >
+              <option value="">Todas disciplinas</option>
+              {opcoes.disciplinas.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
             <select
               onChange={(e) => {
                 setPage(0);
@@ -133,7 +155,7 @@ export default function AdminModuloPage() {
               className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm"
             >
               <option value="">Todas bancas</option>
-              {FILTER_BANCAS.map((b) => (
+              {opcoes.bancas.map((b) => (
                 <option key={b} value={b}>
                   {b}
                 </option>

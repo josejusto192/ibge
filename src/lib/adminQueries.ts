@@ -95,6 +95,10 @@ export interface QuestaoSearchFilters {
   texto?: string;
   disciplina?: string;
   banca?: string;
+  cargo?: string;
+  nivel_escolaridade?: string;
+  orgao?: string;
+  assunto?: string;
   apenas?: 'todas' | 'revisadas' | 'nao_revisadas';
 }
 
@@ -104,14 +108,38 @@ export async function searchQuestoes(filters: QuestaoSearchFilters, page: number
   let query = supabase.from('questoes').select('*', { count: 'exact' }).order('created_at', { ascending: false });
 
   if (filters.texto) query = query.ilike('enunciado', `%${filters.texto}%`);
-  if (filters.disciplina) query = query.ilike('disciplina', `%${filters.disciplina}%`);
+  if (filters.disciplina) query = query.eq('disciplina', filters.disciplina);
   if (filters.banca) query = query.eq('banca', filters.banca);
+  if (filters.cargo) query = query.eq('cargo', filters.cargo);
+  if (filters.nivel_escolaridade) query = query.eq('nivel_escolaridade', filters.nivel_escolaridade);
+  if (filters.orgao) query = query.eq('orgao', filters.orgao);
+  if (filters.assunto) query = query.ilike('assunto', `%${filters.assunto}%`);
   if (filters.apenas === 'revisadas') query = query.eq('revisado', true);
   if (filters.apenas === 'nao_revisadas') query = query.eq('revisado', false);
 
   const { data, error, count } = await query.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
   if (error) throw error;
   return { rows: data ?? [], total: count ?? 0 };
+}
+
+export interface FiltrosQuestoes {
+  bancas: string[];
+  disciplinas: string[];
+  cargos: string[];
+  niveis: string[];
+  orgaos: string[];
+}
+
+export async function fetchFiltrosQuestoes(): Promise<FiltrosQuestoes> {
+  const { data, error } = await supabase.rpc('admin_filtros_questoes').maybeSingle();
+  if (error) throw error;
+  return {
+    bancas: data?.bancas ?? [],
+    disciplinas: data?.disciplinas ?? [],
+    cargos: data?.cargos ?? [],
+    niveis: data?.niveis ?? [],
+    orgaos: data?.orgaos ?? [],
+  };
 }
 
 export async function fetchQuestaoAdmin(id: string): Promise<QuestaoRow> {

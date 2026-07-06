@@ -353,6 +353,16 @@ export type Database = {
           atualizado_em: string;
         }[];
       };
+      admin_filtros_questoes: {
+        Args: Record<string, never>;
+        Returns: {
+          bancas: string[] | null;
+          disciplinas: string[] | null;
+          cargos: string[] | null;
+          niveis: string[] | null;
+          orgaos: string[] | null;
+        }[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
