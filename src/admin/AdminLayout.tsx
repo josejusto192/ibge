@@ -28,7 +28,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-dvh bg-gray-50">
+    <div className="flex h-dvh overflow-hidden bg-gray-50">
       <aside className="flex w-64 flex-none flex-col border-r border-gray-200 bg-white">
         <div className="flex items-center gap-2.5 p-5">
           <div className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-blue-600">

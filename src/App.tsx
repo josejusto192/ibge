@@ -24,6 +24,7 @@ import AdminModuloPage from './admin/AdminModuloPage';
 import AdminQuestoesBancoPage from './admin/AdminQuestoesBancoPage';
 import AdminQuestaoReviewPage from './admin/AdminQuestaoReviewPage';
 import AdminUsuariosPage from './admin/AdminUsuariosPage';
+import AdminErrosPage from './admin/AdminErrosPage';
 import AdminConfiguracoesPage from './admin/AdminConfiguracoesPage';
 
 function LoadingScreen() {
@@ -193,6 +194,14 @@ function AdminRoutes() {
         element={
           <AdminGuard>
             <AdminUsuariosPage />
+          </AdminGuard>
+        }
+      />
+      <Route
+        path="erros"
+        element={
+          <AdminGuard>
+            <AdminErrosPage />
           </AdminGuard>
         }
       />
