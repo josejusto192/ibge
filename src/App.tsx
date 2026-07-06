@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AppDataProvider } from './contexts/AppDataContext';
 import OnboardingScreen from './screens/onboarding/OnboardingScreen';
 import LoginScreen from './screens/Login';
+import ForgotPasswordScreen from './screens/ForgotPassword';
+import ResetPasswordScreen from './screens/ResetPassword';
 import Home from './screens/home/Home';
 import Question from './screens/question/Question';
 import Result from './screens/Result';
@@ -63,6 +65,18 @@ function StudentRoutes() {
           </PublicOnlyRoute>
         }
       />
+      <Route
+        path="/esqueci-senha"
+        element={
+          <PublicOnlyRoute>
+            <ForgotPasswordScreen />
+          </PublicOnlyRoute>
+        }
+      />
+      {/* Sem guarda: o link de recuperação de e-mail estabelece uma sessão de
+          recovery, e PublicOnlyRoute redirecionaria pra /trilha antes do
+          aluno poder trocar a senha. */}
+      <Route path="/redefinir-senha" element={<ResetPasswordScreen />} />
       <Route
         path="/trilha"
         element={

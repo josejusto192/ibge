@@ -61,7 +61,12 @@ export default function LoginScreen() {
           />
         </div>
         <div className="mt-3.5">
-          <div className="mb-1.5 font-sans text-[12px] font-bold text-text2">SENHA</div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <div className="font-sans text-[12px] font-bold text-text2">SENHA</div>
+            <div onClick={() => navigate('/esqueci-senha')} className="cursor-pointer font-sans text-[12px] font-bold text-blue">
+              Esqueceu a senha?
+            </div>
+          </div>
           <input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
