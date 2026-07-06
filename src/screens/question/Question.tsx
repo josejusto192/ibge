@@ -10,6 +10,7 @@ import type { Questao } from '../../data/types';
 import PatternBackground from '../../components/PatternBackground';
 import ReportSheet from './ReportSheet';
 import AiTutorSheet from './AiTutorSheet';
+import { logClientError } from '../../lib/errorLog';
 
 export default function Question() {
   const { state, dispatch } = useAppState();
@@ -19,6 +20,7 @@ export default function Question() {
   const [reportReason, setReportReason] = useState<string | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [questoes, setQuestoes] = useState<Questao[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
 
   const currentModulo = modules.find((m) => m.status === 'current') ?? null;
@@ -27,13 +29,30 @@ export default function Question() {
   useEffect(() => {
     if (!currentModuloId) return;
     setQuestoes(null);
-    fetchQuestoesDoModulo(currentModuloId).then(setQuestoes);
+    setLoadError(false);
+    fetchQuestoesDoModulo(currentModuloId)
+      .then(setQuestoes)
+      .catch((err) => {
+        logClientError(err, 'fetchQuestoesDoModulo');
+        setLoadError(true);
+      });
   }, [currentModuloId]);
 
   if (!currentModulo) {
     return (
       <div className="flex flex-1 items-center justify-center p-6 text-center font-sans text-[13.5px] font-semibold text-text2">
         Nenhum módulo disponível para começar agora.
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+        <div className="font-sans text-[13.5px] font-semibold text-text2">Não conseguimos carregar as questões agora.</div>
+        <button onClick={() => navigate('/trilha')} className="font-sans text-[13px] font-extrabold text-blue">
+          Voltar para a trilha
+        </button>
       </div>
     );
   }

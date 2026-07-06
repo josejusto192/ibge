@@ -9,6 +9,8 @@ import OnboardingScreen from './screens/onboarding/OnboardingScreen';
 import LoginScreen from './screens/Login';
 import ForgotPasswordScreen from './screens/ForgotPassword';
 import ResetPasswordScreen from './screens/ResetPassword';
+import TermosDeUsoScreen from './screens/legal/Termos';
+import PoliticaPrivacidadeScreen from './screens/legal/Privacidade';
 import Home from './screens/home/Home';
 import Question from './screens/question/Question';
 import Result from './screens/Result';
@@ -77,6 +79,10 @@ function StudentRoutes() {
           recovery, e PublicOnlyRoute redirecionaria pra /trilha antes do
           aluno poder trocar a senha. */}
       <Route path="/redefinir-senha" element={<ResetPasswordScreen />} />
+      {/* Sem guarda de propósito: acessíveis tanto no onboarding (aluno ainda
+          sem conta) quanto por um aluno já logado. */}
+      <Route path="/termos" element={<TermosDeUsoScreen />} />
+      <Route path="/privacidade" element={<PoliticaPrivacidadeScreen />} />
       <Route
         path="/trilha"
         element={

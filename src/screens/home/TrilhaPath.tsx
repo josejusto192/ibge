@@ -14,7 +14,7 @@ function offsetX(i: number) {
 }
 
 export default function TrilhaPath() {
-  const { modules, loading, activeTrilha } = useAppData();
+  const { modules, loading, loadError, retry, activeTrilha } = useAppData();
   const { dispatch } = useAppState();
   const navigate = useNavigate();
   const [aula, setAula] = useState<Modulo | null>(null);
@@ -26,6 +26,17 @@ export default function TrilhaPath() {
   }
 
   if (loading) return null;
+
+  if (loadError) {
+    return (
+      <div className="mt-10 flex flex-col items-center gap-3 text-center font-sans text-[13px] font-semibold text-text3">
+        <div>{loadError}</div>
+        <button onClick={retry} className="rounded-xl bg-blue px-4 py-2 font-sans text-[13px] font-extrabold text-white">
+          Tentar de novo
+        </button>
+      </div>
+    );
+  }
 
   if (!modules.length) {
     return (

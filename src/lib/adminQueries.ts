@@ -208,3 +208,28 @@ export async function updateConfiguracoesIA(patch: ConfiguracoesIAPatch) {
     .eq('id', 1);
   if (error) throw error;
 }
+
+// ---- Erros de cliente (monitoramento leve, sem Sentry) ----
+
+export interface ClientErrorRow {
+  id: number;
+  usuario_id: string | null;
+  mensagem: string;
+  stack: string | null;
+  contexto: string | null;
+  url: string | null;
+  user_agent: string | null;
+  criado_em: string;
+}
+
+const ERROS_PAGE_SIZE = 30;
+
+export async function fetchClientErrors(page: number): Promise<{ rows: ClientErrorRow[]; total: number }> {
+  const { data, error, count } = await supabase
+    .from('client_errors')
+    .select('*', { count: 'exact' })
+    .order('criado_em', { ascending: false })
+    .range(page * ERROS_PAGE_SIZE, page * ERROS_PAGE_SIZE + ERROS_PAGE_SIZE - 1);
+  if (error) throw error;
+  return { rows: data ?? [], total: count ?? 0 };
+}

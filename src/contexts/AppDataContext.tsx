@@ -3,6 +3,7 @@ import { useUsuario, type Usuario } from '../hooks/useUsuario';
 import { fetchDailyDone, fetchModulos, fetchProgressoModulos, fetchTrilhas, type ModuloRow, type TrilhaRow } from '../lib/queries';
 import type { Database } from '../lib/database.types';
 import type { Modulo, ModuloStatus } from '../data/types';
+import { logClientError } from '../lib/errorLog';
 
 type UsuarioUpdate = Database['public']['Tables']['usuarios']['Update'];
 
@@ -38,6 +39,8 @@ function computeModules(modulos: ModuloRow[], progresso: Map<number, { acertos: 
 
 interface AppDataContextValue {
   loading: boolean;
+  loadError: string | null;
+  retry: () => void;
   usuario: Usuario | null;
   updateUsuario: (patch: UsuarioUpdate) => Promise<void>;
   addXp: (amount: number) => Promise<void>;
@@ -52,38 +55,60 @@ interface AppDataContextValue {
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
 
+const LOAD_ERROR_MESSAGE = 'Não conseguimos carregar seus dados agora. Verifique sua conexão e tente de novo.';
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const { usuario, loading: loadingUsuario, updateUsuario, addXp } = useUsuario();
   const [trilhas, setTrilhas] = useState<TrilhaRow[]>([]);
   const [modules, setModules] = useState<Modulo[]>([]);
   const [dailyDone, setDailyDone] = useState(0);
   const [loadingTrilhas, setLoadingTrilhas] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryTick, setRetryTick] = useState(0);
 
   useEffect(() => {
+    setLoadingTrilhas(true);
     fetchTrilhas()
-      .then(setTrilhas)
+      .then((rows) => {
+        setTrilhas(rows);
+        setLoadError(null);
+      })
+      .catch((err) => {
+        logClientError(err, 'fetchTrilhas');
+        setLoadError(LOAD_ERROR_MESSAGE);
+      })
       .finally(() => setLoadingTrilhas(false));
-  }, []);
+  }, [retryTick]);
 
   const activeTrilha = trilhas.find((t) => t.id === usuario?.trilha_ativa_id) ?? trilhas.find((t) => t.ativa) ?? trilhas[0] ?? null;
 
   const refreshModules = useCallback(async () => {
     if (!usuario || !activeTrilha) return;
-    const modulos = await fetchModulos(activeTrilha.id);
-    const progresso = await fetchProgressoModulos(
-      usuario.id,
-      modulos.map((m) => m.id)
-    );
-    setModules(computeModules(modulos, progresso));
+    try {
+      const modulos = await fetchModulos(activeTrilha.id);
+      const progresso = await fetchProgressoModulos(
+        usuario.id,
+        modulos.map((m) => m.id)
+      );
+      setModules(computeModules(modulos, progresso));
+      setLoadError(null);
+    } catch (err) {
+      logClientError(err, 'refreshModules');
+      setLoadError(LOAD_ERROR_MESSAGE);
+    }
   }, [usuario, activeTrilha]);
 
   useEffect(() => {
     refreshModules();
-  }, [refreshModules]);
+  }, [refreshModules, retryTick]);
 
   const refreshDailyDone = useCallback(async () => {
     if (!usuario) return;
-    setDailyDone(await fetchDailyDone(usuario.id));
+    try {
+      setDailyDone(await fetchDailyDone(usuario.id));
+    } catch (err) {
+      logClientError(err, 'refreshDailyDone');
+    }
   }, [usuario]);
 
   useEffect(() => {
@@ -97,10 +122,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [updateUsuario]
   );
 
+  const retry = useCallback(() => setRetryTick((t) => t + 1), []);
+
   return (
     <AppDataContext.Provider
       value={{
         loading: loadingUsuario || loadingTrilhas,
+        loadError,
+        retry,
         usuario,
         updateUsuario,
         addXp,

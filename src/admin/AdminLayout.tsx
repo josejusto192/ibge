@@ -29,6 +29,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <NavLink to="/admin/usuarios" className={NAV_LINK_CLASS}>
               Usuários
             </NavLink>
+            <NavLink to="/admin/erros" className={NAV_LINK_CLASS}>
+              Erros
+            </NavLink>
             <NavLink to="/admin/configuracoes" className={NAV_LINK_CLASS}>
               Configurações
             </NavLink>

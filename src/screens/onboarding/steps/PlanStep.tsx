@@ -17,6 +17,7 @@ export default function PlanStep({ planConcurso, planMeta, planWeeks, refCode }:
   const { ob } = state;
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
+  const [aceitouTermos, setAceitouTermos] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [modulos, setModulos] = useState<number | null>(null);
@@ -29,6 +30,10 @@ export default function PlanStep({ planConcurso, planMeta, planWeeks, refCode }:
   async function finish() {
     if (password.trim().length < 6) {
       setError('A senha precisa ter pelo menos 6 caracteres.');
+      return;
+    }
+    if (!aceitouTermos) {
+      setError('Você precisa aceitar os Termos de Uso e a Política de Privacidade para continuar.');
       return;
     }
     setError(null);
@@ -70,6 +75,7 @@ export default function PlanStep({ planConcurso, planMeta, planWeeks, refCode }:
       streak: 1,
       ultimo_acesso: today,
       assinatura_ativa: true,
+      termos_aceitos_em: new Date().toISOString(),
     });
 
     if (refCode) {
@@ -162,10 +168,31 @@ export default function PlanStep({ planConcurso, planMeta, planWeeks, refCode }:
           className="h-[50px] w-full rounded-2xl border-[1.5px] border-border bg-[#F8FAFF] px-3.5 font-sans text-[14px] font-semibold text-ink outline-none"
         />
       </div>
+
+      <label className="mt-4 flex items-start gap-2.5">
+        <input
+          type="checkbox"
+          checked={aceitouTermos}
+          onChange={(e) => setAceitouTermos(e.target.checked)}
+          className="mt-0.5 h-4 w-4 flex-none"
+        />
+        <span className="font-sans text-[12.5px] font-semibold leading-[1.45] text-text2">
+          Li e aceito os{' '}
+          <a href="/termos" target="_blank" rel="noreferrer" className="font-extrabold text-blue underline">
+            Termos de Uso
+          </a>{' '}
+          e a{' '}
+          <a href="/privacidade" target="_blank" rel="noreferrer" className="font-extrabold text-blue underline">
+            Política de Privacidade
+          </a>
+          .
+        </span>
+      </label>
+
       {error && <div className="mt-2.5 font-sans text-[12.5px] font-bold text-error">{error}</div>}
 
       <div className="mt-5.5">
-        <PrimaryButton onClick={finish} variant={ob.submitting ? 'disabled' : 'blue'} disabled={ob.submitting}>
+        <PrimaryButton onClick={finish} variant={ob.submitting ? 'disabled' : 'blue'} disabled={ob.submitting || !aceitouTermos}>
           {ob.submitting ? 'Criando conta...' : 'Criar conta e começar'}
         </PrimaryButton>
       </div>

@@ -93,6 +93,7 @@ export type Database = {
           xp: number;
           trilha_ativa_id: number | null;
           is_admin: boolean;
+          termos_aceitos_em: string | null;
         };
         Insert: {
           id: string;
@@ -109,6 +110,7 @@ export type Database = {
           meta_diaria?: number;
           xp?: number;
           trilha_ativa_id?: number | null;
+          termos_aceitos_em?: string | null;
         };
         Update: {
           nome?: string | null;
@@ -124,6 +126,7 @@ export type Database = {
           xp?: number;
           trilha_ativa_id?: number | null;
           is_admin?: boolean;
+          termos_aceitos_em?: string | null;
         };
         Relationships: [];
       };
@@ -265,6 +268,28 @@ export type Database = {
         Update: {
           status?: 'pendente' | 'assinou';
         };
+        Relationships: [];
+      };
+      client_errors: {
+        Row: {
+          id: number;
+          usuario_id: string | null;
+          mensagem: string;
+          stack: string | null;
+          contexto: string | null;
+          url: string | null;
+          user_agent: string | null;
+          criado_em: string;
+        };
+        Insert: {
+          usuario_id?: string | null;
+          mensagem: string;
+          stack?: string | null;
+          contexto?: string | null;
+          url?: string | null;
+          user_agent?: string | null;
+        };
+        Update: Record<string, never>;
         Relationships: [];
       };
       // Configuração do revisor de IA (Google Gemini) — só admin lê/escreve.

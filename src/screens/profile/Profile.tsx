@@ -135,9 +135,18 @@ export default function Profile() {
             ))}
           </div>
 
+          <div className="mt-5.5 flex justify-center gap-4 font-sans text-[12px] font-bold text-text3">
+            <a href="/termos" target="_blank" rel="noreferrer" className="underline">
+              Termos de Uso
+            </a>
+            <a href="/privacidade" target="_blank" rel="noreferrer" className="underline">
+              Política de Privacidade
+            </a>
+          </div>
+
           <button
             onClick={logout}
-            className="mt-5.5 h-[50px] w-full rounded-2xl border-[1.5px] border-border bg-surface font-sans text-[14px] font-extrabold text-error"
+            className="mt-3 h-[50px] w-full rounded-2xl border-[1.5px] border-border bg-surface font-sans text-[14px] font-extrabold text-error"
           >
             Sair da conta
           </button>
