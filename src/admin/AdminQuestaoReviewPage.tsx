@@ -60,8 +60,13 @@ export default function AdminQuestaoReviewPage() {
 
   async function handleUnmark() {
     if (!id) return;
-    await unmarkRevisado(id);
-    load();
+    setError(null);
+    try {
+      await unmarkRevisado(id);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao desmarcar revisão.');
+    }
   }
 
   function insertImage() {
