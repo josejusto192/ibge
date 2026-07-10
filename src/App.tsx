@@ -201,7 +201,7 @@ function AdminRoutes() {
       <Route
         path="usuarios"
         element={
-          <AdminGuard>
+          <AdminGuard adminOnly>
             <AdminUsuariosPage />
           </AdminGuard>
         }
@@ -209,7 +209,7 @@ function AdminRoutes() {
       <Route
         path="erros"
         element={
-          <AdminGuard>
+          <AdminGuard adminOnly>
             <AdminErrosPage />
           </AdminGuard>
         }
@@ -217,7 +217,7 @@ function AdminRoutes() {
       <Route
         path="configuracoes"
         element={
-          <AdminGuard>
+          <AdminGuard adminOnly>
             <AdminConfiguracoesPage />
           </AdminGuard>
         }

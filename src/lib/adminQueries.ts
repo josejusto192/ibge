@@ -195,7 +195,7 @@ export async function searchUsuarios(texto: string | undefined, page: number): P
   return { rows: data ?? [], total: count ?? 0 };
 }
 
-export async function updateUsuarioAdmin(id: string, patch: Partial<Pick<Usuario, 'assinatura_ativa' | 'is_admin'>>) {
+export async function updateUsuarioAdmin(id: string, patch: Partial<Pick<Usuario, 'assinatura_ativa' | 'is_admin' | 'is_editor'>>) {
   const { error } = await supabase.from('usuarios').update(patch).eq('id', id);
   if (error) throw error;
 }
@@ -211,6 +211,7 @@ export interface ConfiguracoesIA {
   modelo: string;
   prompt_extra: string | null;
   tutor_prompt_extra: string | null;
+  tutor_limite_diario: number;
   api_key_configurada: boolean;
   atualizado_em: string;
 }
@@ -220,6 +221,7 @@ export interface ConfiguracoesIAPatch {
   api_key?: string;
   prompt_extra?: string | null;
   tutor_prompt_extra?: string | null;
+  tutor_limite_diario?: number;
 }
 
 export async function fetchConfiguracoesIA(): Promise<ConfiguracoesIA> {

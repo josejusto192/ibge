@@ -26,6 +26,7 @@ export default function AdminConfiguracoesPage() {
         modelo: config.modelo,
         prompt_extra: config.prompt_extra,
         tutor_prompt_extra: config.tutor_prompt_extra,
+        tutor_limite_diario: config.tutor_limite_diario,
         ...(novaApiKey.trim() ? { api_key: novaApiKey.trim() } : {}),
       });
       setNovaApiKey('');
@@ -118,6 +119,20 @@ export default function AdminConfiguracoesPage() {
           <div className="mt-1 text-xs text-gray-400">
             Some ao enunciado, alternativas, gabarito e comentário da questão atual — o aluno só vê essa parte se pedir ajuda depois
             de responder.
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <label className="text-xs font-bold text-gray-500">LIMITE DE PERGUNTAS AO TUTOR POR ALUNO/DIA</label>
+          <input
+            type="number"
+            min={1}
+            value={config.tutor_limite_diario}
+            onChange={(e) => setConfig({ ...config, tutor_limite_diario: Math.max(1, Number(e.target.value) || 1) })}
+            className="mt-1 w-32 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+          />
+          <div className="mt-1 text-xs text-gray-400">
+            Protege seu custo no Gemini — quem estourar recebe um aviso pra voltar amanhã. Só respostas bem-sucedidas contam.
           </div>
         </div>
 

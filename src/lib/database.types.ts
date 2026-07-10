@@ -93,6 +93,7 @@ export type Database = {
           xp: number;
           trilha_ativa_id: number | null;
           is_admin: boolean;
+          is_editor: boolean;
           termos_aceitos_em: string | null;
         };
         Insert: {
@@ -126,6 +127,7 @@ export type Database = {
           xp?: number;
           trilha_ativa_id?: number | null;
           is_admin?: boolean;
+          is_editor?: boolean;
           termos_aceitos_em?: string | null;
         };
         Relationships: [];
@@ -301,6 +303,7 @@ export type Database = {
           api_key: string | null;
           prompt_extra: string | null;
           tutor_prompt_extra: string | null;
+          tutor_limite_diario: number;
           atualizado_em: string;
         };
         Insert: {
@@ -309,6 +312,7 @@ export type Database = {
           api_key?: string | null;
           prompt_extra?: string | null;
           tutor_prompt_extra?: string | null;
+          tutor_limite_diario?: number;
           atualizado_em?: string;
         };
         Update: {
@@ -316,6 +320,7 @@ export type Database = {
           api_key?: string | null;
           prompt_extra?: string | null;
           tutor_prompt_extra?: string | null;
+          tutor_limite_diario?: number;
           atualizado_em?: string;
         };
         Relationships: [];
@@ -349,6 +354,7 @@ export type Database = {
           modelo: string;
           prompt_extra: string | null;
           tutor_prompt_extra: string | null;
+          tutor_limite_diario: number;
           api_key_configurada: boolean;
           atualizado_em: string;
         }[];

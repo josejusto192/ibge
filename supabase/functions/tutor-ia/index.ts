@@ -72,8 +72,26 @@ Deno.serve(async (req: Request) => {
     .single();
   if (qErr || !questao) return json({ error: 'Questão não encontrada' }, 404);
 
-  const { data: config } = await admin.from('configuracoes_ia').select('modelo, api_key, tutor_prompt_extra').eq('id', 1).single();
+  const { data: config } = await admin
+    .from('configuracoes_ia')
+    .select('modelo, api_key, tutor_prompt_extra, tutor_limite_diario')
+    .eq('id', 1)
+    .single();
   if (!config?.api_key) return json({ error: 'Tutor de IA ainda não configurado. Peça para o admin configurar em Configurações.' }, 400);
+
+  // Rate limit diário por aluno (proteção de custo do Gemini). Conta só
+  // respostas bem-sucedidas — erro de rede/IA não consome a cota.
+  const limiteDiario = config.tutor_limite_diario ?? 20;
+  const inicioDoDia = new Date();
+  inicioDoDia.setUTCHours(0, 0, 0, 0);
+  const { count: usosHoje } = await admin
+    .from('tutor_ia_usos')
+    .select('id', { count: 'exact', head: true })
+    .eq('usuario_id', userData.user.id)
+    .gte('usado_em', inicioDoDia.toISOString());
+  if ((usosHoje ?? 0) >= limiteDiario) {
+    return json({ error: `Você atingiu o limite de ${limiteDiario} perguntas ao tutor por dia. Volte amanhã!` }, 429);
+  }
 
   const alternativasTexto = (questao.alternativas ?? [])
     .map((a: { letra: string; texto: string }) => `${a.letra}) ${a.texto}${a.letra === questao.gabarito_letra ? '  ← correta' : ''}`)
@@ -131,6 +149,8 @@ Responda à última mensagem do aluno.`;
   const geminiJson = await geminiRes.json();
   const reply: string = geminiJson.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
   if (!reply.trim()) return json({ error: 'A IA não retornou conteúdo.' }, 502);
+
+  await admin.from('tutor_ia_usos').insert({ usuario_id: userData.user.id });
 
   return json({ reply: reply.trim() });
 });

@@ -24,11 +24,24 @@ export default function AdminUsuariosPage() {
 
   useEffect(refresh, [texto, page]);
 
-  async function toggle(usuario: Usuario, field: 'assinatura_ativa' | 'is_admin') {
+  async function toggleAssinatura(usuario: Usuario) {
     setBusyId(usuario.id);
     setError(null);
     try {
-      await updateUsuarioAdmin(usuario.id, { [field]: !usuario[field] });
+      await updateUsuarioAdmin(usuario.id, { assinatura_ativa: !usuario.assinatura_ativa });
+      refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar usuário.');
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function setPapel(usuario: Usuario, papel: 'aluno' | 'editor' | 'admin') {
+    setBusyId(usuario.id);
+    setError(null);
+    try {
+      await updateUsuarioAdmin(usuario.id, { is_admin: papel === 'admin', is_editor: papel === 'editor' });
       refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar usuário.');
@@ -40,7 +53,10 @@ export default function AdminUsuariosPage() {
   return (
     <AdminLayout>
       <h1 className="text-xl font-extrabold text-gray-900">Usuários</h1>
-      <p className="mt-1 text-sm text-gray-500">Gerencie assinatura e permissão de admin de cada usuário.</p>
+      <p className="mt-1 text-sm text-gray-500">
+        Gerencie assinatura e papel de cada usuário. Editor cura trilhas e revisa questões, mas não vê usuários, erros nem
+        configurações.
+      </p>
 
       <input
         placeholder="Buscar por nome ou e-mail..."
@@ -63,7 +79,7 @@ export default function AdminUsuariosPage() {
               <th className="px-4 py-3">Streak</th>
               <th className="px-4 py-3">XP</th>
               <th className="px-4 py-3">Assinatura</th>
-              <th className="px-4 py-3">Admin</th>
+              <th className="px-4 py-3">Papel</th>
             </tr>
           </thead>
           <tbody>
@@ -79,7 +95,7 @@ export default function AdminUsuariosPage() {
                   <td className="px-4 py-3">
                     <button
                       disabled={busy}
-                      onClick={() => toggle(u, 'assinatura_ativa')}
+                      onClick={() => toggleAssinatura(u)}
                       className={`rounded-full px-2 py-0.5 text-xs font-bold disabled:opacity-40 ${
                         u.assinatura_ativa ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                       }`}
@@ -88,16 +104,17 @@ export default function AdminUsuariosPage() {
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <button
+                    <select
                       disabled={busy || isSelf}
-                      title={isSelf ? 'Você não pode alterar sua própria permissão de admin.' : undefined}
-                      onClick={() => toggle(u, 'is_admin')}
-                      className={`rounded-full px-2 py-0.5 text-xs font-bold disabled:opacity-40 ${
-                        u.is_admin ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
-                      }`}
+                      title={isSelf ? 'Você não pode alterar seu próprio papel.' : undefined}
+                      value={u.is_admin ? 'admin' : u.is_editor ? 'editor' : 'aluno'}
+                      onChange={(e) => setPapel(u, e.target.value as 'aluno' | 'editor' | 'admin')}
+                      className="rounded-lg border border-gray-300 px-2 py-1 text-xs font-bold disabled:opacity-40"
                     >
-                      {u.is_admin ? 'Admin' : 'Aluno'}
-                    </button>
+                      <option value="aluno">Aluno</option>
+                      <option value="editor">Editor</option>
+                      <option value="admin">Admin</option>
+                    </select>
                   </td>
                 </tr>
               );

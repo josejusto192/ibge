@@ -3,24 +3,28 @@ import type { Icon } from '@phosphor-icons/react';
 import { Bug, Eye, GearSix, Path, SignOut, Stack, Users } from '@phosphor-icons/react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useUsuario } from '../hooks/useUsuario';
 
 interface NavItem {
   to: string;
   label: string;
   icon: Icon;
+  adminOnly?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/admin/trilhas', label: 'Trilhas', icon: Path },
   { to: '/admin/questoes', label: 'Banco de questões', icon: Stack },
-  { to: '/admin/usuarios', label: 'Usuários', icon: Users },
-  { to: '/admin/erros', label: 'Erros', icon: Bug },
-  { to: '/admin/configuracoes', label: 'Configurações', icon: GearSix },
+  { to: '/admin/usuarios', label: 'Usuários', icon: Users, adminOnly: true },
+  { to: '/admin/erros', label: 'Erros', icon: Bug, adminOnly: true },
+  { to: '/admin/configuracoes', label: 'Configurações', icon: GearSix, adminOnly: true },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const { signOut } = useAuth();
+  const { usuario } = useUsuario();
   const navigate = useNavigate();
+  const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || usuario?.is_admin);
 
   async function logout() {
     await signOut();
@@ -41,7 +45,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          {NAV_ITEMS.map(({ to, label, icon: ItemIcon }) => (
+          {navItems.map(({ to, label, icon: ItemIcon }) => (
             <NavLink
               key={to}
               to={to}

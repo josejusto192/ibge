@@ -11,13 +11,16 @@ function LoadingScreen() {
   );
 }
 
-export default function AdminGuard({ children }: { children: ReactNode }) {
+// adminOnly: páginas sensíveis (usuários, erros, configurações) exigem
+// admin de verdade; as demais aceitam também o papel editor (curadoria).
+export default function AdminGuard({ children, adminOnly = false }: { children: ReactNode; adminOnly?: boolean }) {
   const { session, loading: loadingAuth } = useAuth();
   const { usuario, loading: loadingUsuario } = useUsuario();
 
   if (loadingAuth || (session && loadingUsuario)) return <LoadingScreen />;
   if (!session) return <Navigate to="/login" replace />;
-  if (!usuario?.is_admin) return <Navigate to="/trilha" replace />;
+  const allowed = usuario?.is_admin || (!adminOnly && usuario?.is_editor);
+  if (!allowed) return <Navigate to="/trilha" replace />;
 
   return <>{children}</>;
 }

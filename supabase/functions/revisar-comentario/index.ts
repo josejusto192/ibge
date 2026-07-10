@@ -34,8 +34,8 @@ Deno.serve(async (req: Request) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
-  const { data: perfil } = await admin.from('usuarios').select('is_admin').eq('id', userData.user.id).single();
-  if (!perfil?.is_admin) return json({ error: 'Só admin pode revisar questões.' }, 403);
+  const { data: perfil } = await admin.from('usuarios').select('is_admin, is_editor').eq('id', userData.user.id).single();
+  if (!perfil?.is_admin && !perfil?.is_editor) return json({ error: 'Só admin ou editor pode revisar questões.' }, 403);
 
   let questaoId: string | undefined;
   try {
