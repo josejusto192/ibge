@@ -19,6 +19,7 @@ import Stats from './screens/Stats';
 import Ranking from './screens/Ranking';
 import Profile from './screens/profile/Profile';
 import AdminGuard from './admin/AdminGuard';
+import AdminDashboardPage from './admin/AdminDashboardPage';
 import AdminTrilhasPage from './admin/AdminTrilhasPage';
 import AdminTrilhaDetailPage from './admin/AdminTrilhaDetailPage';
 import AdminModuloPage from './admin/AdminModuloPage';
@@ -157,7 +158,14 @@ function StudentRoutes() {
 function AdminRoutes() {
   return (
     <Routes>
-      <Route index element={<Navigate to="/admin/trilhas" replace />} />
+      <Route
+        index
+        element={
+          <AdminGuard>
+            <AdminDashboardPage />
+          </AdminGuard>
+        }
+      />
       <Route
         path="trilhas"
         element={

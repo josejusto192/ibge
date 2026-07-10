@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { fetchModulos, fetchTrilhas, type ModuloRow, type TrilhaRow } from '../lib/queries';
-import { createModulo, deleteModulo, deleteTrilha, updateModulo, updateTrilha } from '../lib/adminQueries';
+import { createModulo, deleteModulo, deleteTrilha, fetchContagemQuestoesPorModulo, updateModulo, updateTrilha } from '../lib/adminQueries';
 import AdminLayout from './AdminLayout';
 
 export default function AdminTrilhaDetailPage() {
@@ -11,6 +11,7 @@ export default function AdminTrilhaDetailPage() {
 
   const [trilha, setTrilha] = useState<TrilhaRow | null>(null);
   const [modulos, setModulos] = useState<ModuloRow[] | null>(null);
+  const [contagens, setContagens] = useState<Map<number, number>>(new Map());
   const [novoTipo, setNovoTipo] = useState<'questoes' | 'aula'>('questoes');
   const [novoModulo, setNovoModulo] = useState('');
   const [novoVideoUrl, setNovoVideoUrl] = useState('');
@@ -18,7 +19,10 @@ export default function AdminTrilhaDetailPage() {
 
   function refresh() {
     fetchTrilhas().then((all) => setTrilha(all.find((t) => t.id === trilhaId) ?? null));
-    fetchModulos(trilhaId).then(setModulos);
+    fetchModulos(trilhaId).then((rows) => {
+      setModulos(rows);
+      fetchContagemQuestoesPorModulo(rows.map((m) => m.id)).then(setContagens);
+    });
   }
 
   useEffect(refresh, [trilhaId]);
@@ -201,8 +205,14 @@ export default function AdminTrilhaDetailPage() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-gray-900">{m.titulo}</span>
-                {m.tipo === 'aula' && (
+                {m.tipo === 'aula' ? (
                   <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-700">Aula · opcional</span>
+                ) : (contagens.get(m.id) ?? 0) > 0 ? (
+                  <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600">
+                    {contagens.get(m.id)} questões
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">⚠ sem questões</span>
                 )}
               </div>
               {m.tipo === 'aula' && (

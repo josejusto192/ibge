@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import type { QuestaoRow } from '../lib/database.types';
-import { addQuestaoToModulo, fetchQuestaoAdmin, reviewWithAI, saveManualReview, unmarkRevisado } from '../lib/adminQueries';
+import {
+  addQuestaoToModulo,
+  fetchProximaNaoRevisada,
+  fetchQuestaoAdmin,
+  reviewWithAI,
+  saveManualReview,
+  unmarkRevisado,
+} from '../lib/adminQueries';
 import { sanitizeHtml } from '../lib/sanitizeHtml';
 import { useAuth } from '../contexts/AuthContext';
 import AdminLayout from './AdminLayout';
@@ -11,12 +18,14 @@ export default function AdminQuestaoReviewPage() {
   const [searchParams] = useSearchParams();
   const moduloId = searchParams.get('modulo');
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [questao, setQuestao] = useState<QuestaoRow | null>(null);
   const [draft, setDraft] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [addedToModulo, setAddedToModulo] = useState(false);
 
   function load() {
@@ -44,12 +53,22 @@ export default function AdminQuestaoReviewPage() {
     }
   }
 
-  async function handleSaveManual() {
+  async function handleSaveManual(irParaProxima = false) {
     if (!id || !user) return;
     setSaving(true);
     setError(null);
+    setInfo(null);
     try {
       await saveManualReview(id, user.id, draft);
+      if (irParaProxima) {
+        const proximaId = await fetchProximaNaoRevisada(id);
+        if (proximaId) {
+          navigate(`/admin/questoes/${proximaId}${moduloId ? `?modulo=${moduloId}` : ''}`);
+          setAddedToModulo(false);
+          return;
+        }
+        setInfo('Salvo! Não há mais questões não revisadas. 🎉');
+      }
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar revisão.');
@@ -168,14 +187,22 @@ export default function AdminQuestaoReviewPage() {
       </div>
 
       {error && <div className="mt-3 text-sm font-semibold text-red-600">{error}</div>}
+      {info && <div className="mt-3 text-sm font-semibold text-green-600">{info}</div>}
 
       <div className="mt-4 flex items-center gap-3">
         <button
-          onClick={handleSaveManual}
+          onClick={() => handleSaveManual(false)}
           disabled={saving}
           className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {saving ? 'Salvando…' : 'Salvar e marcar como revisado'}
+        </button>
+        <button
+          onClick={() => handleSaveManual(true)}
+          disabled={saving}
+          className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 disabled:opacity-50"
+        >
+          Salvar e revisar próxima »
         </button>
         {moduloId && questao.revisado && (
           <button

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchTrilhas, type TrilhaRow } from '../lib/queries';
-import { createTrilha } from '../lib/adminQueries';
+import { createTrilha, fetchDashboardTrilhas, type DashboardTrilha } from '../lib/adminQueries';
 import AdminLayout from './AdminLayout';
 
 export default function AdminTrilhasPage() {
   const [trilhas, setTrilhas] = useState<TrilhaRow[] | null>(null);
+  const [contagens, setContagens] = useState<Map<number, DashboardTrilha>>(new Map());
   const [creating, setCreating] = useState(false);
   const [nome, setNome] = useState('');
   const [slug, setSlug] = useState('');
@@ -14,6 +15,7 @@ export default function AdminTrilhasPage() {
 
   function refresh() {
     fetchTrilhas().then(setTrilhas);
+    fetchDashboardTrilhas().then((rows) => setContagens(new Map(rows.map((r) => [r.id, r]))));
   }
 
   useEffect(refresh, []);
@@ -83,31 +85,45 @@ export default function AdminTrilhasPage() {
               <th className="px-4 py-3">Nome</th>
               <th className="px-4 py-3">Slug</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Módulos</th>
+              <th className="px-4 py-3">Questões</th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
-            {(trilhas ?? []).map((t) => (
-              <tr key={t.id} className="border-t border-gray-100">
-                <td className="px-4 py-3 font-semibold text-gray-900">{t.nome}</td>
-                <td className="px-4 py-3 text-gray-500">{t.slug}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${t.ativa ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
-                  >
-                    {t.ativa ? 'Ativa' : 'Inativa'}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link to={`/admin/trilhas/${t.id}`} className="font-bold text-blue-600 hover:underline">
-                    Editar ›
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {(trilhas ?? []).map((t) => {
+              const c = contagens.get(t.id);
+              return (
+                <tr key={t.id} className="border-t border-gray-100">
+                  <td className="px-4 py-3 font-semibold text-gray-900">{t.nome}</td>
+                  <td className="px-4 py-3 text-gray-500">{t.slug}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${t.ativa ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      {t.ativa ? 'Ativa' : 'Inativa'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {c?.modulos ?? '—'}
+                    {(c?.modulos_sem_questoes ?? 0) > 0 && (
+                      <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
+                        ⚠ {c!.modulos_sem_questoes} sem questões
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{c?.questoes ?? '—'}</td>
+                  <td className="px-4 py-3 text-right">
+                    <Link to={`/admin/trilhas/${t.id}`} className="font-bold text-blue-600 hover:underline">
+                      Editar ›
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
             {trilhas?.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
                   Nenhuma trilha ainda.
                 </td>
               </tr>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { QuestaoRow } from '../lib/database.types';
 import {
@@ -12,6 +12,7 @@ import {
   type QuestaoSearchFilters,
   type FiltrosQuestoes,
 } from '../lib/adminQueries';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import AdminLayout from './AdminLayout';
 
 const FILTROS_VAZIOS: FiltrosQuestoes = { bancas: [], disciplinas: [], cargos: [], niveis: [], orgaos: [] };
@@ -24,11 +25,17 @@ export default function AdminModuloPage() {
   const [trilhaId, setTrilhaId] = useState<number | null>(null);
   const [assigned, setAssigned] = useState<{ ordem: number; questao: QuestaoRow }[] | null>(null);
   const [filters, setFilters] = useState<QuestaoSearchFilters>({ apenas: 'todas' });
+  const [texto, setTexto] = useState('');
+  const textoDeb = useDebouncedValue(texto);
   const [opcoes, setOpcoes] = useState<FiltrosQuestoes>(FILTROS_VAZIOS);
   const [results, setResults] = useState<QuestaoRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
+  const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+  const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+
+  const effectiveFilters = useMemo(() => ({ ...filters, texto: textoDeb.trim() || undefined }), [filters, textoDeb]);
 
   function refreshAssigned() {
     fetchModuloQuestoesAdmin(id).then(setAssigned);
@@ -48,12 +55,16 @@ export default function AdminModuloPage() {
   }, []);
 
   useEffect(() => {
-    searchQuestoes(filters, page).then((r) => {
+    setPage(0);
+  }, [effectiveFilters]);
+
+  useEffect(() => {
+    searchQuestoes(effectiveFilters, page).then((r) => {
       setResults(r.rows);
       setTotal(r.total);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, page]);
+  }, [effectiveFilters, page]);
 
   const assignedIds = new Set((assigned ?? []).map((a) => a.questao.id));
 
@@ -64,6 +75,34 @@ export default function AdminModuloPage() {
       refreshAssigned();
     } catch (err) {
       setAddError(err instanceof Error ? err.message : 'Erro ao adicionar questão.');
+    }
+  }
+
+  function toggleSelecionada(questaoId: string) {
+    setSelecionadas((s) => {
+      const next = new Set(s);
+      if (next.has(questaoId)) next.delete(questaoId);
+      else next.add(questaoId);
+      return next;
+    });
+  }
+
+  async function handleAddSelecionadas() {
+    const ids = [...selecionadas];
+    if (!ids.length || adding) return;
+    setAdding(true);
+    setAddError(null);
+    let ordem = assigned?.length ?? 0;
+    try {
+      for (const questaoId of ids) {
+        await addQuestaoToModulo(id, questaoId, ordem++);
+      }
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Erro ao adicionar questões.');
+    } finally {
+      setSelecionadas(new Set());
+      setAdding(false);
+      refreshAssigned();
     }
   }
 
@@ -127,10 +166,8 @@ export default function AdminModuloPage() {
           <div className="mt-2 flex flex-wrap gap-2">
             <input
               placeholder="Buscar no enunciado..."
-              onChange={(e) => {
-                setPage(0);
-                setFilters((f) => ({ ...f, texto: e.target.value || undefined }));
-              }}
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
               className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
             />
             <select
@@ -174,6 +211,16 @@ export default function AdminModuloPage() {
             </select>
           </div>
 
+          {selecionadas.size > 0 && (
+            <button
+              onClick={handleAddSelecionadas}
+              disabled={adding}
+              className="mt-2 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {adding ? 'Adicionando…' : `Adicionar selecionadas (${selecionadas.size})`}
+            </button>
+          )}
+
           {addError && <div className="mt-2 text-sm font-semibold text-red-600">{addError}</div>}
 
           <div className="mt-2 max-h-[560px] overflow-y-auto rounded-xl border border-gray-200 bg-white">
@@ -181,6 +228,14 @@ export default function AdminModuloPage() {
               const already = assignedIds.has(q.id);
               return (
                 <div key={q.id} className="flex items-start gap-2 border-t border-gray-100 p-3 first:border-t-0">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-none"
+                    disabled={already || !q.revisado || adding}
+                    checked={selecionadas.has(q.id)}
+                    onChange={() => toggleSelecionada(q.id)}
+                    title={already ? 'Já no módulo' : !q.revisado ? 'Revise antes de adicionar' : 'Selecionar pra adicionar em lote'}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="line-clamp-2 text-sm font-semibold text-gray-800">{q.enunciado}</div>
                     <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">

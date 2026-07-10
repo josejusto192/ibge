@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Icon } from '@phosphor-icons/react';
-import { Bug, Eye, GearSix, Path, SignOut, Stack, Users } from '@phosphor-icons/react';
+import { Bug, Eye, GearSix, House, Path, SignOut, Stack, Users } from '@phosphor-icons/react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUsuario } from '../hooks/useUsuario';
@@ -10,9 +10,11 @@ interface NavItem {
   label: string;
   icon: Icon;
   adminOnly?: boolean;
+  end?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
+  { to: '/admin', label: 'Visão geral', icon: House, end: true },
   { to: '/admin/trilhas', label: 'Trilhas', icon: Path },
   { to: '/admin/questoes', label: 'Banco de questões', icon: Stack },
   { to: '/admin/usuarios', label: 'Usuários', icon: Users, adminOnly: true },
@@ -45,10 +47,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          {navItems.map(({ to, label, icon: ItemIcon }) => (
+          {navItems.map(({ to, label, icon: ItemIcon, end }) => (
             <NavLink
               key={to}
               to={to}
+              end={end}
               className={({ isActive }) =>
                 `flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                   isActive ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'

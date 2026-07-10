@@ -122,6 +122,32 @@ export async function searchQuestoes(filters: QuestaoSearchFilters, page: number
   return { rows: data ?? [], total: count ?? 0 };
 }
 
+// Próxima questão não revisada (pro botão "Salvar e revisar próxima" —
+// mesma ordenação da lista, ignorando a questão atual).
+export async function fetchProximaNaoRevisada(excluirId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('questoes')
+    .select('id')
+    .eq('revisado', false)
+    .neq('id', excluirId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.id ?? null;
+}
+
+// Resolve quem revisou (via RPC — editor não lê usuarios direto).
+export async function fetchNomesUsuarios(ids: string[]): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const unicos = [...new Set(ids)];
+  if (!unicos.length) return map;
+  const { data, error } = await supabase.rpc('admin_nomes_usuarios', { p_ids: unicos });
+  if (error) throw error;
+  for (const row of data ?? []) map.set(row.id, row.nome);
+  return map;
+}
+
 export interface FiltrosQuestoes {
   bancas: string[];
   disciplinas: string[];
@@ -237,6 +263,48 @@ export async function updateConfiguracoesIA(patch: ConfiguracoesIAPatch) {
     .update({ ...patch, atualizado_em: new Date().toISOString() })
     .eq('id', 1);
   if (error) throw error;
+}
+
+// ---- Dashboard ----
+
+export interface DashboardStats {
+  total_questoes: number;
+  questoes_revisadas: number;
+  total_alunos: number | null;
+  alunos_ativos_hoje: number | null;
+  erros_7d: number | null;
+  tutor_usos_hoje: number | null;
+}
+
+export async function fetchDashboardStats(): Promise<DashboardStats | null> {
+  const { data, error } = await supabase.rpc('admin_dashboard_stats').maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export interface DashboardTrilha {
+  id: number;
+  nome: string;
+  ativa: boolean;
+  modulos: number;
+  modulos_sem_questoes: number;
+  questoes: number;
+}
+
+export async function fetchDashboardTrilhas(): Promise<DashboardTrilha[]> {
+  const { data, error } = await supabase.rpc('admin_dashboard_trilhas');
+  if (error) throw error;
+  return data ?? [];
+}
+
+// Contagem de questões por módulo (pra lista de módulos de uma trilha).
+export async function fetchContagemQuestoesPorModulo(moduloIds: number[]): Promise<Map<number, number>> {
+  const map = new Map<number, number>();
+  if (!moduloIds.length) return map;
+  const { data, error } = await supabase.from('modulo_questoes').select('modulo_id').in('modulo_id', moduloIds).limit(10000);
+  if (error) throw error;
+  for (const row of data ?? []) map.set(row.modulo_id, (map.get(row.modulo_id) ?? 0) + 1);
+  return map;
 }
 
 // ---- Erros de cliente (monitoramento leve, sem Sentry) ----

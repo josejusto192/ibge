@@ -373,6 +373,32 @@ export type Database = {
         Args: { p_trilha_id: number };
         Returns: number;
       };
+      admin_dashboard_stats: {
+        Args: Record<string, never>;
+        Returns: {
+          total_questoes: number;
+          questoes_revisadas: number;
+          total_alunos: number | null;
+          alunos_ativos_hoje: number | null;
+          erros_7d: number | null;
+          tutor_usos_hoje: number | null;
+        }[];
+      };
+      admin_dashboard_trilhas: {
+        Args: Record<string, never>;
+        Returns: {
+          id: number;
+          nome: string;
+          ativa: boolean;
+          modulos: number;
+          modulos_sem_questoes: number;
+          questoes: number;
+        }[];
+      };
+      admin_nomes_usuarios: {
+        Args: { p_ids: string[] };
+        Returns: { id: string; nome: string }[];
+      };
       get_minhas_questoes_erradas: {
         Args: { p_trilha_id: number };
         Returns: ModuloQuestaoRow[];
