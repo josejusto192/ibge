@@ -9,12 +9,18 @@ type UsuarioUpdate = Database['public']['Tables']['usuarios']['Update']
 export function useUsuario() {
   const { user } = useAuth()
   const [usuario, setUsuario] = useState<Usuario | null>(null)
-  const [loading, setLoading] = useState(true)
+  // `loading` é DERIVADO (não um estado atualizado via efeito) de propósito:
+  // ao abrir /admin direto pela URL/F5, a sessão é restaurada num render em
+  // que o efeito de fetch ainda nem rodou — um loading via setState só
+  // viraria true um commit depois, e nesse meio-tempo o AdminGuard via
+  // "loading=false + usuario=null" e expulsava o admin pra /trilha.
+  const [fetchedFor, setFetchedFor] = useState<string | null>(null)
+  const loading = !!user && fetchedFor !== user.id
 
   useEffect(() => {
     if (!user) {
       setUsuario(null)
-      setLoading(false)
+      setFetchedFor(null)
       return
     }
 
@@ -64,7 +70,7 @@ export function useUsuario() {
         if (!cancelled) setUsuario(created)
       }
 
-      if (!cancelled) setLoading(false)
+      if (!cancelled) setFetchedFor(user.id)
     }
 
     upsertUsuario()
