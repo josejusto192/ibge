@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__supabase__execute_sql",
+      "Bash(node scripts/revisao/imagem.mjs:*)",
+      "Bash(node scripts/revisao/resumo.mjs)",
+      "Bash(node scripts/revisao/baixar.mjs:*)",
+      "Bash(node scripts/revisao/enviar.mjs)",
+      "Read(revisao-trabalho/**)",
+      "Write(revisao-trabalho/**)",
+      "Edit(revisao-trabalho/**)"
+    ],
+    "deny": [
+      "Read(scripts/revisao/.env)"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}

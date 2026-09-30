@@ -1,0 +1,41 @@
+# Publica as Edge Functions do Asaas e do tutor de IA no Supabase.
+# Roda sozinho quando uma função muda na main, ou manualmente em
+# Actions → "Publicar Edge Functions" → Run workflow.
+# Precisa do secret SUPABASE_ACCESS_TOKEN no repositório (Settings →
+# Secrets and variables → Actions).
+name: Publicar Edge Functions
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/_shared/**'
+      - 'supabase/functions/asaas-*/**'
+      - 'supabase/functions/tutor-ia/**'
+      - '.github/workflows/deploy-edge-functions.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: lvdbdxoojjirzjrxxchi
+    steps:
+      - name: Verificar token
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
+            echo "::error::Falta o secret SUPABASE_ACCESS_TOKEN (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # asaas-sync-cliente e asaas-webhook são chamadas pelo banco e pelo
+      # Asaas (sem login de usuário) e se autenticam por segredo próprio.
+      - run: supabase functions deploy asaas-sync-cliente --no-verify-jwt --project-ref "$PROJECT_REF"
+      - run: supabase functions deploy asaas-webhook --no-verify-jwt --project-ref "$PROJECT_REF"
+      - run: supabase functions deploy asaas-assinar --project-ref "$PROJECT_REF"
+      - run: supabase functions deploy asaas-cancelar --project-ref "$PROJECT_REF"
+      - run: supabase functions deploy tutor-ia --project-ref "$PROJECT_REF"
