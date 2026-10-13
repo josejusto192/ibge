@@ -17,7 +17,9 @@
 .mascot .m-arm-l { transform-origin: 42px 73px; }
 .mascot .m-arm-r { transform-origin: 102px 73px; }
 .mascot .m-antenna { transform-origin: 72px 28px; }
-.mascot .m-spark { transform-box: fill-box; transform-origin: center; }
+.mascot .m-head { transform-origin: 72px 86px; }
+.mascot .m-spark,
+.mascot .m-dot { transform-box: fill-box; transform-origin: center; }
 
 @keyframes m-breathe {
   0%, 100% { transform: scale(1, 1); }
@@ -37,16 +39,62 @@
   0%, 100% { transform: rotate(-7deg); }
   50% { transform: rotate(7deg); }
 }
-/* saltitar (thinking): sobe/desce + estica/amassa sincronizados */
-@keyframes m-hop {
-  0%, 100% { transform: translateY(0); animation-timing-function: cubic-bezier(.3, 0, .5, 1); }
-  45% { transform: translateY(-12px); animation-timing-function: cubic-bezier(.5, 0, .7, 1); }
+/* pensando (thinking): ciclo de 2.4s. O corpo pesa pra um lado e pro outro,
+   a cabeça e a antena seguem com atraso (movimento secundário), a mão vai pro
+   queixo e fica batucando, os olhos acompanham o balão que se forma
+   bolinha a bolinha. */
+@keyframes m-think-sway {
+  0%, 100% { transform: rotate(0) scale(1, 1); }
+  30% { transform: rotate(-3.5deg) scale(1.012, .988); }
+  55% { transform: rotate(-1deg) scale(1, 1); }
+  80% { transform: rotate(2.5deg) scale(1.012, .988); }
 }
-@keyframes m-hop-squash {
-  0%, 100% { transform: scale(1.07, .92); }
-  15% { transform: scale(.95, 1.06); }
-  45% { transform: scale(1, 1); }
-  80% { transform: scale(.97, 1.03); }
+@keyframes m-think-head {
+  0%, 100% { transform: rotate(0); }
+  35% { transform: rotate(-5deg); }
+  55% { transform: rotate(-2deg); }
+  80% { transform: rotate(3deg); }
+}
+@keyframes m-think-bob {
+  0%, 55%, 100% { transform: translateY(0); }
+  30%, 80% { transform: translateY(-2.5px); }
+}
+@keyframes m-think-shadow {
+  0%, 55%, 100% { transform: scale(1); opacity: .12; }
+  30%, 80% { transform: scale(.95); opacity: .09; }
+}
+@keyframes m-think-antenna {
+  0%, 100% { transform: rotate(0); }
+  38% { transform: rotate(9deg); }
+  58% { transform: rotate(1deg); }
+  86% { transform: rotate(-7deg); }
+}
+@keyframes m-think-arm-l {
+  0%, 100% { transform: rotate(0); }
+  30% { transform: rotate(8deg); }
+  80% { transform: rotate(-5deg); }
+}
+/* mão sobe pro queixo uma vez (com overshoot) e depois só batuca */
+@keyframes m-chin-in {
+  from { transform: rotate(0); }
+  to { transform: rotate(100deg); }
+}
+@keyframes m-chin-tap {
+  0%, 40%, 54%, 68%, 100% { transform: rotate(100deg); }
+  47%, 61% { transform: rotate(107deg); }
+}
+/* olha pro balão enquanto ele se forma, depois vagueia */
+@keyframes m-think-look {
+  0%, 33%, 95%, 100% { transform: translate(3px, -2.6px); }
+  38%, 70% { transform: translate(-2.6px, -1.6px); }
+  75%, 90% { transform: translate(.6px, .4px); }
+}
+@keyframes m-think-dot {
+  0%, 6% { opacity: 0; transform: translateY(3px) scale(0); }
+  14% { opacity: 1; transform: translateY(-1px) scale(1.2); }
+  20% { transform: translateY(0) scale(1); }
+  60% { opacity: 1; transform: translateY(-1.5px) scale(1); }
+  76%, 100% { opacity: 0; transform: translateY(-5px) scale(.6); }
 }
 @keyframes m-hop-shadow {
   0%, 100% { transform: scale(1); opacity: .12; }
@@ -56,10 +104,6 @@
   0%, 100% { transform: rotate(0); }
   25% { transform: rotate(-9deg); }
   60% { transform: rotate(8deg); }
-}
-@keyframes m-dot {
-  0%, 100% { opacity: .15; transform: translateY(0); }
-  30% { opacity: 1; transform: translateY(-2px); }
 }
 /* pulinho único (happy) */
 @keyframes m-jump-once {
@@ -141,14 +185,17 @@
 .mood-encourage .m-antenna { animation: m-antenna-sway 3.2s ease-in-out infinite; }
 .mood-wave .m-arm-r { animation: m-wave 2.6s ease-in-out infinite; }
 
-.mood-thinking .m-jump { animation: m-hop .9s infinite; }
-.mood-thinking .m-body { animation: m-hop-squash .9s infinite; }
-.mood-thinking .m-shadow { animation: m-hop-shadow .9s infinite; }
-.mood-thinking .m-antenna { animation: m-antenna-bounce .9s ease-in-out infinite; }
-.mood-thinking .m-pupils { transform: translate(2px, -2.2px); }
-.mood-thinking .m-dot { animation: m-dot 1.2s ease-in-out infinite; }
-.mood-thinking .m-dot.d2 { animation-delay: .2s; }
-.mood-thinking .m-dot.d3 { animation-delay: .4s; }
+.mood-thinking .m-jump { animation: m-think-bob 2.4s ease-in-out infinite; }
+.mood-thinking .m-body { animation: m-think-sway 2.4s ease-in-out infinite; }
+.mood-thinking .m-head { animation: m-think-head 2.4s ease-in-out .1s infinite; }
+.mood-thinking .m-shadow { animation: m-think-shadow 2.4s ease-in-out infinite; }
+.mood-thinking .m-antenna { animation: m-think-antenna 2.4s ease-in-out infinite; }
+.mood-thinking .m-arm-l { animation: m-think-arm-l 2.4s ease-in-out infinite; }
+.mood-thinking .m-arm-r { animation: m-chin-in .55s cubic-bezier(.3, 1.4, .5, 1) both, m-chin-tap 2.4s ease-in-out .55s infinite; }
+.mood-thinking .m-pupils { animation: m-think-look 2.4s ease-in-out infinite; }
+.mood-thinking .m-dot { animation: m-think-dot 2.4s ease-in-out both infinite; }
+.mood-thinking .m-dot.d2 { animation-delay: .22s; }
+.mood-thinking .m-dot.d3 { animation-delay: .44s; }
 
 .mood-happy .m-jump { animation: m-jump-once .7s ease-out both; }
 .mood-happy .m-body { animation: m-squash-once .7s ease-out both, m-breathe 2.8s .75s ease-in-out infinite; }

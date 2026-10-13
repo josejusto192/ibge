@@ -4,7 +4,7 @@
 // a animação recomeçar sempre que o humor muda (ex.: acertou → errou).
 //
 //   idle       respira, pisca e olha em volta
-//   thinking   saltita "pensando" (carregamento)
+//   thinking   mão no queixo, pesa de um lado pro outro olhando o balão (carregamento)
 //   happy      pulinho com os braços pra cima (acertou)
 //   celebrate  pula sem parar, braços balançando (módulo concluído)
 //   encourage  cabeça inclinada + braço de força (errou — "bora de novo")
@@ -76,6 +76,14 @@ function Extras({ mood }: { mood: MascotMood }) {
 
 export default function Mascot({ mood = 'idle', size = 120, className = '' }: { mood?: MascotMood; size?: number; className?: string }) {
   const brows = mood === 'encourage';
+  // Braços ficam atrás do corpo; no thinking o direito vai pro queixo, então
+  // precisa ser desenhado depois da cabeça pra ficar na frente.
+  const armR = (
+    <g className="m-arm-r">
+      <path d="m102 73 14 10" stroke="#1557E6" strokeWidth="8" strokeLinecap="round" />
+      <circle cx="117" cy="84" r="5" fill="#FFCB2D" />
+    </g>
+  );
   return (
     <svg
       key={mood}
@@ -95,10 +103,7 @@ export default function Mascot({ mood = 'idle', size = 120, className = '' }: { 
             <path d="M42 73 28 83" stroke="#1557E6" strokeWidth="8" strokeLinecap="round" />
             <circle cx="27" cy="84" r="5" fill="#FFCB2D" />
           </g>
-          <g className="m-arm-r">
-            <path d="m102 73 14 10" stroke="#1557E6" strokeWidth="8" strokeLinecap="round" />
-            <circle cx="117" cy="84" r="5" fill="#FFCB2D" />
-          </g>
+          {mood !== 'thinking' && armR}
           <g className="m-antenna">
             <path d="M72 28V14" stroke="#1557E6" strokeWidth="4" strokeLinecap="round" />
             <circle cx="72" cy="11" r="5.5" fill="#FFCB2D" />
@@ -119,6 +124,7 @@ export default function Mascot({ mood = 'idle', size = 120, className = '' }: { 
             <circle cx="53" cy="69" r="3.2" fill="#FFB0A3" opacity=".85" />
             <circle cx="91" cy="69" r="3.2" fill="#FFB0A3" opacity=".85" />
           </g>
+          {mood === 'thinking' && armR}
           <path d="M60 96h24" stroke="#FFCB2D" strokeWidth="5" strokeLinecap="round" />
         </g>
       </g>
